@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, SetPasswordForm
 from django import forms
 from django.contrib.auth.models import User
+from .models import Alumno
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}), required=True)
@@ -53,3 +54,29 @@ class LoginForm(forms.Form):
         self.fields['password'].widget.attrs['placeholder'] = 'Password'
         self.fields['password'].label = 'Password'
         self.fields['password'].help_text = 'Required. 8 characters or fewer. Letters, digits and @/./+/-/_ only.'
+
+
+class AlumnoForm(forms.ModelForm):
+    first_name = forms.CharField(label="Nombre", max_length=30, required=True)
+    last_name = forms.CharField(label="Apellido", max_length=30, required=True)
+    email = forms.EmailField(label="Email", required=True)
+
+    class Meta:
+        model = Alumno
+        fields = ['dni', 'fecha_nacimiento', 'direccion', 'telefono', 'legajo', 'first_name', 'last_name', 'email']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.user:  # Si el Alumno ya tiene un User
+            self.fields['first_name'].initial = self.instance.user.first_name
+            self.fields['last_name'].initial = self.instance.user.last_name
+            self.fields['email'].initial = self.instance.user.email
+
+    def save(self, commit=True):
+        alumno = super().save(commit=False)
+        if alumno.user:  # Si ya tiene usuario, actualizamos sus datos
+            alumno.user.first_name = self.cleaned_data['first_name']
+            alumno.user.last_name = self.cleaned_data['last_name']
+            alumno.user.email = self.cleaned_data['email']
+            alumno.user.save()
+        return alumno
