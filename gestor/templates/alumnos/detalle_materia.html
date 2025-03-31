@@ -9,7 +9,10 @@
     <ul class="list-group">
         {% for comision in comisiones %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
-            <strong>{{ comision.nombre }}</strong>
+            <strong>{{ comision.comision.nombre }}</strong>
+            {% if comision.horarios.exists %}
+            <span class="text-muted"> | {% for horario in comision.horarios.all %} {{ horario }} |{% endfor %} </span>
+            {% endif %}
             <a href="#" class="btn btn-primary btn-sm">Inscribirse</a>
         </li>
         {% endfor %}

@@ -111,7 +111,8 @@ def materias(request):
 @login_required
 def detalle_materia(request, materia_id):
     materia = Materia.objects.get(id=materia_id)
-    comisiones = materia.comisiones.all()
+    comisiones = materia.materia_comisiones.all()
+    print(comisiones)
     
     return render(request, "alumnos/detalle_materia.html", {
         "materia": materia,

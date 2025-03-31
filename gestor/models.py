@@ -29,7 +29,6 @@ class Materia(models.Model):
     año = models.PositiveIntegerField(blank=True, null=True)
     creditos = models.PositiveIntegerField()
     profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE, blank=True, null=True)
-    comisiones = models.ManyToManyField('Comision', blank=True)
 
     def __str__(self):
         return self.nombre
@@ -40,6 +39,35 @@ class Comision(models.Model):
     def __str__(self):
         return self.nombre
     
+class Horario(models.Model):
+    DIAS_SEMANA = [
+        ('Lunes', 'Lunes'),
+        ('Martes', 'Martes'),
+        ('Miércoles', 'Miércoles'),
+        ('Jueves', 'Jueves'),
+        ('Viernes', 'Viernes'),
+        ('Sábado', 'Sábado'),
+        ('Domingo', 'Domingo'),
+    ]
+    
+    dias = models.CharField(max_length=100, choices=DIAS_SEMANA, blank=True)  # Día único
+    hora_inicio = models.CharField()
+    hora_fin = models.CharField()
+
+    def __str__(self):
+        return f"{self.dias} {self.hora_inicio} - {self.hora_fin}"
+
+class MateriaComision(models.Model):
+    materia = models.ForeignKey(Materia, on_delete=models.CASCADE, related_name="materia_comisiones")
+    comision = models.ForeignKey(Comision, on_delete=models.CASCADE, related_name="comision_materias")
+    cupo_maximo = models.PositiveIntegerField(default=30)
+    horarios = models.ManyToManyField(Horario, blank=True)
+
+    def __str__(self):
+        return f"{self.materia.nombre} - {self.comision.nombre}"
+
+
+    
 class Inscripcion(models.Model):
     alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE)
     materia = models.ForeignKey(Materia, on_delete=models.CASCADE, blank=True, null=True)
@@ -49,11 +77,3 @@ class Inscripcion(models.Model):
     def __str__(self):
         return f"{self.alumno} - {self.materia}"
     
-class Horario(models.Model):
-    materia = models.ForeignKey(Materia, on_delete=models.CASCADE)
-    dia = models.CharField(max_length=10, choices=[('Lunes', 'Lunes'), ('Martes', 'Martes'), ('Miercoles', 'Miercoles'), ('Jueves', 'Jueves'), ('Viernes', 'Viernes'), ('Sabado', 'Sabado')])
-    hora_inicio = models.TimeField()
-    hora_fin = models.TimeField()
-
-    def __str__(self):
-        return f"{self.materia} - {self.dia} {self.hora_inicio} - {self.hora_fin}"

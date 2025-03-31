@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
-from .models import Alumno, Materia, Comision, Inscripcion, Horario, Profesor
+from .models import Alumno, Materia, Comision, Inscripcion, Horario, Profesor, MateriaComision
 from .forms import AlumnoForm
 from django.utils.html import format_html
 
@@ -24,5 +24,25 @@ class AlumnoAdmin(admin.ModelAdmin):
 
 admin.site.register(Alumno, AlumnoAdmin)
 
-admin.site.register(Materia)
-admin.site.register(Comision)
+
+
+class MateriaComisionInline(admin.TabularInline):
+    model = MateriaComision
+    extra = 1
+
+@admin.register(Materia)
+class MateriaAdmin(admin.ModelAdmin):
+    list_display = ('codigo', 'nombre', 'año', 'creditos')
+    inlines = [MateriaComisionInline]  # Permite agregar comisiones desde Materia
+
+@admin.register(Comision)
+class ComisionAdmin(admin.ModelAdmin):
+    list_display = ('nombre',)
+
+@admin.register(MateriaComision)
+class MateriaComisionAdmin(admin.ModelAdmin):
+    list_display = ('materia', 'comision', 'cupo_maximo')
+    filter_horizontal = ('horarios',)  # Muestra una interfaz para seleccionar horarios en el admin
+
+admin.site.register(Horario)
+
