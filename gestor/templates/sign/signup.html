@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<main class="container py-5">
+    <div class="row">
+        <div class="col-md-4 offset-md-4">
+            <form action="{% url 'signup' %}", method="post" class="card card-body">
+                {% csrf_token %}
+                
+                <h1 class="text-center">SignUp</h1>
+        
+
+                {{ form.as_p }}
+
+                <button type="submit" class="btn btn-primary">Sign Up</button>
+            </form>
+        </div>
+    </div>
+</main>
+
+{% endblock content %}
