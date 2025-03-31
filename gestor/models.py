@@ -28,26 +28,21 @@ class Materia(models.Model):
     descripcion = models.TextField(blank=True)
     año = models.PositiveIntegerField(blank=True, null=True)
     creditos = models.PositiveIntegerField()
+    profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE, blank=True, null=True)
+    comisiones = models.ManyToManyField('Comision', blank=True)
 
     def __str__(self):
         return self.nombre
     
 class Comision(models.Model):
-    materia = models.ForeignKey(Materia, on_delete=models.CASCADE, related_name='comisiones')
-    horario = models.ForeignKey('Horario', on_delete=models.CASCADE)
-    profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE)
-    cupos = models.PositiveIntegerField()
-    alumnos_inscritos = models.ManyToManyField(Alumno, through='Inscripcion')
+    nombre = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.materia} - {self.horario}"
-    
-    def cupos_disponibles(self):
-        return self.cupos - self.alumnos_inscritos.count()
+        return self.nombre
     
 class Inscripcion(models.Model):
     alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE)
-    comision = models.ForeignKey(Comision, on_delete=models.CASCADE)
+    materia = models.ForeignKey(Materia, on_delete=models.CASCADE, blank=True, null=True)
     nota = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     fecha_inscripcion = models.DateField(auto_now_add=True)
 

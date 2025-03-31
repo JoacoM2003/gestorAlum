@@ -23,3 +23,6 @@ class AlumnoAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 admin.site.register(Alumno, AlumnoAdmin)
+
+admin.site.register(Materia)
+admin.site.register(Comision)

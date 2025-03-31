@@ -99,3 +99,21 @@ def cambiar_contraseña(request):
         form = PasswordChangeForm(request.user)
     
     return render(request, "alumnos/cambiar_contraseña.html", {"form": form})
+
+@login_required
+def materias(request):
+    materias = Materia.objects.all()
+    
+    return render(request, "alumnos/materias.html", {
+        "materias": materias,
+    })
+
+@login_required
+def detalle_materia(request, materia_id):
+    materia = Materia.objects.get(id=materia_id)
+    comisiones = materia.comisiones.all()
+    
+    return render(request, "alumnos/detalle_materia.html", {
+        "materia": materia,
+        "comisiones": comisiones
+    })

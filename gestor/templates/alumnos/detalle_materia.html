@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ materia.nombre }}</h2>
+    <p>{{ materia.descripcion }}</p>
+
+    <h3>Comisiones Disponibles</h3>
+    <ul class="list-group">
+        {% for comision in comisiones %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>{{ comision.nombre }}</strong>
+            <a href="#" class="btn btn-primary btn-sm">Inscribirse</a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'materias' %}" class="btn btn-secondary mt-3">Volver</a>
+</div>
+{% endblock %}
+
