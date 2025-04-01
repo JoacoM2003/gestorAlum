@@ -103,9 +103,12 @@ def cambiar_contraseña(request):
 @login_required
 def materias(request):
     materias = Materia.objects.all()
+    materias_inscritas = Inscripcion.objects.filter(alumno=request.user.alumno).values_list('materia_id', flat=True)
+    print(materias_inscritas)
     
     return render(request, "alumnos/materias.html", {
         "materias": materias,
+        "materias_inscritas": materias_inscritas
     })
 
 @login_required
@@ -118,3 +121,32 @@ def detalle_materia(request, materia_id):
         "materia": materia,
         "comisiones": comisiones
     })
+
+@login_required
+def inscribir_materia(request, materia_id):
+    materia = Materia.objects.get(id=materia_id)
+    alumno = Alumno.objects.get(user=request.user)
+    
+    if Inscripcion.objects.filter(alumno=alumno, materia=materia).exists():
+        messages.info(request, "Ya est s inscrito en esta materia.")
+    else:
+        inscripcion = Inscripcion(alumno=alumno, materia=materia)
+        inscripcion.save()
+        messages.success(request, "Te has inscrito correctamente en la materia.")
+    
+    return redirect("materias")
+
+
+@login_required
+def desinscribir_materia(request, materia_id):
+    materia = Materia.objects.get(id=materia_id)
+    alumno = Alumno.objects.get(user=request.user)
+    
+    inscripcion = Inscripcion.objects.filter(alumno=alumno, materia=materia).first()
+    if inscripcion:
+        inscripcion.delete()
+        messages.success(request, "Te has desinscrito correctamente de la materia.")
+    else:
+        messages.info(request, "No estas inscrito en esta materia.")
+    
+    return redirect("materias")

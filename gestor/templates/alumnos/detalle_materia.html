@@ -5,6 +5,14 @@
     <h2>{{ materia.nombre }}</h2>
     <p>{{ materia.descripcion }}</p>
 
+    {% if messages %}
+    <div class="alert alert-success">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <h3>Comisiones Disponibles</h3>
     <ul class="list-group">
         {% for comision in comisiones %}
@@ -13,7 +21,27 @@
             {% if comision.horarios.exists %}
             <span class="text-muted"> | {% for horario in comision.horarios.all %} {{ horario }} |{% endfor %} </span>
             {% endif %}
-            <a href="#" class="btn btn-primary btn-sm">Inscribirse</a>
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#inscribirseModal-{{ comision.id }}">
+                Inscribirse
+            </button>
+
+            <div class="modal fade" id="inscribirseModal-{{ comision.id }}" tabindex="-1" aria-labelledby="inscribirseModal-{{ comision.id }}Label" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="inscribirseModal-{{ comision.id }}Label">Confirmar Inscripci n</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Seguro que deseas inscribirte en la comisión {{ comision.comision.nombre }} de la materia {{ materia.nombre }}?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <a href="{% url 'inscribir_materia' materia.id %}" class="btn btn-primary">Inscribirse</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </li>
         {% endfor %}
     </ul>

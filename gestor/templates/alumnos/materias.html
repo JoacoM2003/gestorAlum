@@ -21,9 +21,35 @@
                         <td>{{ materia.codigo }}</td>
                         <td>{{ materia.nombre }}</td>
                         <td>{{ materia.año }}</td>
-                        <td>
-                            <a href="{% url 'detalle_materia' materia.id %}" class="btn btn-info btn-sm">Ver Detalle</a>
-                        </td>
+                        {% if materia.id in materias_inscritas %}
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#eliminarInscripcionModal-{{ materia.id }}">
+                                    Eliminar
+                                </button>
+
+                                <div class="modal fade" id="eliminarInscripcionModal-{{ materia.id }}" tabindex="-1" aria-labelledby="eliminarInscripcionModalLabel-{{ materia.id }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="eliminarInscripcionModalLabel-{{ materia.id }}">Eliminar Inscripci n</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>¿Estás seguro de querer eliminar la inscripción a la materia {{ materia.nombre }}?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <a href="{% url 'desinscribir_materia' materia.id %}" class="btn btn-danger">Eliminar</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        {% else %}
+                            <td>
+                                <a href="{% url 'detalle_materia' materia.id %}" class="btn btn-info btn-sm">Ver Detalle</a>
+                            </td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>

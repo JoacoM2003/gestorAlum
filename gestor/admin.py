@@ -46,3 +46,5 @@ class MateriaComisionAdmin(admin.ModelAdmin):
 
 admin.site.register(Horario)
 
+admin.site.register(Inscripcion)
+
