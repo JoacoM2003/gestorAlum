@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Calificaciones</h2>
+    
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Codigo</th>
+                        <th>Nombre</th>
+                        <th>Año</th>
+                        <th>Nota</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inscripcion in inscripciones %}
+                    <tr>
+                        <td>{{ inscripcion.materia.codigo }}</td>
+                        <td>{{ inscripcion.materia.nombre }}</td>
+                        <td>{{ inscripcion.materia.año }}</td>
+                        {% if inscripcion.aprobado %}
+                        <td>{{ inscripcion.nota }}</td>
+                        {% elif inscripcion.nota < 4 %}
+                        <td>{{  inscripcion.nota }}</td>
+                        {% else %}
+                        <td>Cursando</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

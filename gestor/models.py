@@ -73,7 +73,15 @@ class Inscripcion(models.Model):
     materia = models.ForeignKey(Materia, on_delete=models.CASCADE, blank=True, null=True)
     nota = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     fecha_inscripcion = models.DateField(auto_now_add=True)
+    aprobado = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if self.nota is not None and self.nota > 4:
+            self.aprobado = True
+        else:
+            self.aprobado = False
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.alumno} - {self.materia}"
+        return f"{self.alumno.legajo} - {self.materia}"
     

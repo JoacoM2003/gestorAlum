@@ -17,11 +17,12 @@
                 </thead>
                 <tbody>
                     {% for materia in materias %}
+                    {% if materia.id not in materias_aprobadas %}
                     <tr>
                         <td>{{ materia.codigo }}</td>
                         <td>{{ materia.nombre }}</td>
                         <td>{{ materia.año }}</td>
-                        {% if materia.id in materias_inscritas %}
+                        {% if materia.id in materias_inscritas and materia.id not in materias_menor %}
                             <td>
                                 <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#eliminarInscripcionModal-{{ materia.id }}">
                                     Eliminar
@@ -51,6 +52,7 @@
                             </td>
                         {% endif %}
                     </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>

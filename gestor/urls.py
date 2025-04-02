@@ -13,5 +13,7 @@ urlpatterns = [
     path('materias/<int:materia_id>/', views.detalle_materia, name='detalle_materia'),
     path('materias/<int:materia_id>/inscribir/', views.inscribir_materia, name='inscribir_materia'),
     path('materias/<int:materia_id>/desinscribir/', views.desinscribir_materia, name='desinscribir_materia'),
+    path('calificaciones/', views.calificaciones, name='calificaciones'),
+    
     
 ]
