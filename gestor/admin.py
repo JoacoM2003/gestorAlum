@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 from .models import Alumno, Materia, Comision, Inscripcion, Horario, Profesor, MateriaComision
-from .forms import AlumnoForm
+from .forms import AlumnoForm, ProfesorForm
 from django.utils.html import format_html
 
 class AlumnoAdmin(admin.ModelAdmin):
@@ -23,6 +23,27 @@ class AlumnoAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 admin.site.register(Alumno, AlumnoAdmin)
+
+
+class ProfesorAdmin(admin.ModelAdmin):
+    form = ProfesorForm  # Usar el formulario personalizado
+    list_display = ('user', 'dni', 'legajo')
+    search_fields = ('user__username', 'dni', 'legajo')
+    exclude = ('user',)  # Ocultar el campo 'user' en el admin
+
+    def save_model(self, request, obj, form, change):
+        if not obj.user:  # Si no hay usuario, lo creamos
+            user = User.objects.create_user(
+                username=obj.legajo,  
+                password=obj.dni,
+                first_name=form.cleaned_data['first_name'],
+                last_name=form.cleaned_data['last_name'],
+                email=form.cleaned_data['email']
+            )
+            obj.user = user  # Asignamos el usuario al profesor
+        super().save_model(request, obj, form, change)
+
+admin.site.register(Profesor, ProfesorAdmin)
 
 
 

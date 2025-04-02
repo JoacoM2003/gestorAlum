@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, SetPasswordForm
 from django import forms
 from django.contrib.auth.models import User
-from .models import Alumno
+from .models import Alumno, Profesor
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}), required=True)
@@ -80,3 +80,29 @@ class AlumnoForm(forms.ModelForm):
             alumno.user.email = self.cleaned_data['email']
             alumno.user.save()
         return alumno
+    
+
+class ProfesorForm(forms.ModelForm):
+    first_name = forms.CharField(label="Nombre", max_length=30, required=True)
+    last_name = forms.CharField(label="Apellido", max_length=30, required=True)
+    email = forms.EmailField(label="Email", required=True)
+
+    class Meta:
+        model = Profesor
+        fields = ['dni', 'legajo', 'first_name', 'last_name', 'email']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.user:  # Si el Profesor ya tiene un User
+            self.fields['first_name'].initial = self.instance.user.first_name
+            self.fields['last_name'].initial = self.instance.user.last_name
+            self.fields['email'].initial = self.instance.user.email
+
+    def save(self, commit=True):
+        profesor = super().save(commit=False)
+        if profesor.user:  # Si ya tiene usuario, actualizamos sus datos
+            profesor.user.first_name = self.cleaned_data['first_name']
+            profesor.user.last_name = self.cleaned_data['last_name']
+            profesor.user.email = self.cleaned_data['email']
+            profesor.user.save()
+        return profesor
