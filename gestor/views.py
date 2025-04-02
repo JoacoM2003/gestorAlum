@@ -3,7 +3,7 @@ from .forms import SignUpForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Alumno, Materia, Inscripcion, MateriaComision
+from .models import Alumno, Materia, Inscripcion, MateriaComision, Profesor
 from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 
@@ -54,24 +54,44 @@ def signout(request):
     return redirect('home')
 
 @login_required
-def perfil_alumno(request):
-    alumno = Alumno.objects.get(user=request.user)  # Obtener el Alumno asociado al usuario
+def perfil(request):
+    if not request.user.is_authenticated:
+        return redirect("signin")
+    if hasattr(request.user, 'alumno'):
+        alumno = Alumno.objects.get(user=request.user)  # Obtener el Alumno asociado al usuario
 
-    if request.method == "POST":
-        request.user.first_name = request.POST['first_name']
-        request.user.last_name = request.POST['last_name']
-        request.user.email = request.POST['email']
-        request.user.save()
+        if request.method == "POST":
+            request.user.first_name = request.POST['first_name']
+            request.user.last_name = request.POST['last_name']
+            request.user.email = request.POST['email']
+            request.user.save()
 
-        alumno.dni = request.POST['dni']
-        alumno.telefono = request.POST['telefono']
-        alumno.direccion = request.POST['direccion']
-        alumno.save()
+            alumno.dni = request.POST['dni']
+            alumno.telefono = request.POST['telefono']
+            alumno.direccion = request.POST['direccion']
+            alumno.save()
 
-        messages.success(request, "Perfil actualizado correctamente.")
-        return redirect("home")
+            messages.success(request, "Perfil actualizado correctamente.")
+            return redirect("home")
+        return render(request, "alumnos/perfil.html", {"user": request.user, "alumno": alumno})
+    
+    elif hasattr(request.user, 'profesor'):
+        profesor = Profesor.objects.get(user=request.user)  # Obtener el Profesor asociado al usuario
 
-    return render(request, "alumnos/perfil.html", {"user": request.user, "alumno": alumno})
+        if request.method == "POST":
+            request.user.first_name = request.POST['first_name']
+            request.user.last_name = request.POST['last_name']
+            request.user.email = request.POST['email']
+            request.user.save()
+
+            profesor.dni = request.POST['dni']
+            profesor.telefono = request.POST['telefono']
+            profesor.direccion = request.POST['direccion']
+            profesor.save()
+
+            messages.success(request, "Perfil actualizado correctamente.")
+            return redirect("home")
+        return render(request, "profesores/perfil.html", {"user": request.user, "profesor": profesor})
 
 @login_required
 def editar_usuario(request):
@@ -80,7 +100,7 @@ def editar_usuario(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Usuario actualizado correctamente.")
-            return redirect("perfil_alumno")
+            return redirect("perfil")
     else:
         form = UserChangeForm(instance=request.user)
     
@@ -94,7 +114,7 @@ def cambiar_contraseña(request):
             user = form.save()
             update_session_auth_hash(request, user)  # Mantiene la sesión activa después del cambio
             messages.success(request, "Contraseña actualizada correctamente.")
-            return redirect("perfil_alumno")
+            return redirect("perfil")
     else:
         form = PasswordChangeForm(request.user)
     
