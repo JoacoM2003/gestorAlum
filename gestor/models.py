@@ -70,7 +70,7 @@ class MateriaComision(models.Model):
     
 class Inscripcion(models.Model):
     alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE)
-    materia = models.ForeignKey(Materia, on_delete=models.CASCADE, blank=True, null=True)
+    materia_comision = models.ForeignKey(MateriaComision, on_delete=models.CASCADE, blank=True, null=True)
     nota = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     fecha_inscripcion = models.DateField(auto_now_add=True)
     aprobado = models.BooleanField(default=False)
@@ -83,5 +83,5 @@ class Inscripcion(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.alumno.legajo} - {self.materia}"
+        return f"{self.alumno.legajo} - {self.materia_comision  }"
     

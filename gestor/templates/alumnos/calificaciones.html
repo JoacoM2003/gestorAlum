@@ -9,8 +9,9 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Codigo</th>
+                        <th>Código</th>
                         <th>Nombre</th>
+                        <th>Comisión</th>
                         <th>Año</th>
                         <th>Nota</th>
                     </tr>
@@ -18,9 +19,11 @@
                 <tbody>
                     {% for inscripcion in inscripciones %}
                     <tr>
-                        <td>{{ inscripcion.materia.codigo }}</td>
-                        <td>{{ inscripcion.materia.nombre }}</td>
-                        <td>{{ inscripcion.materia.año }}</td>
+                        <td>{{ inscripcion.materia_comision.materia.codigo }}</td>
+                        <td>{{ inscripcion.materia_comision.materia.nombre }}</td>
+                        <td>{{ inscripcion.materia_comision.comision.nombre }}</td>
+                        <td>{{ inscripcion.materia_comision.materia.año }}</td>
+                        
                         {% if inscripcion.aprobado %}
                         <td>{{ inscripcion.nota }}</td>
                         {% elif inscripcion.nota < 4 %}

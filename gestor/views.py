@@ -1,9 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import SignUpForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Alumno, Materia, Inscripcion
+from .models import Alumno, Materia, Inscripcion, MateriaComision
 from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 
@@ -100,19 +100,33 @@ def cambiar_contraseña(request):
     
     return render(request, "alumnos/cambiar_contraseña.html", {"form": form})
 
-@login_required
 def materias(request):
+    alumno = get_object_or_404(Alumno, user=request.user)
     materias = Materia.objects.all()
-    materias_inscritas = Inscripcion.objects.filter(alumno=request.user.alumno, aprobado=False).values_list('materia_id', flat=True)
-    materias_aprobadas = Inscripcion.objects.filter(alumno=request.user.alumno, aprobado=True).values_list('materia_id', flat=True)
-    materias_menor = Inscripcion.objects.filter(alumno=request.user.alumno, nota__lt=4).values_list('materia_id', flat=True)
 
+    # Obtener inscripciones del alumno
+    inscripciones = Inscripcion.objects.filter(alumno=alumno)
+    comisiones_inscritas = [insc.materia_comision.id for insc in inscripciones]
+    materias_inscritas = {insc.materia_comision.materia for insc in inscripciones}
     
+    # Obtener materias aprobadas por el alumno
+    materias_aprobadas = set()
+    for inscripcion in inscripciones:
+        if inscripcion.aprobado:
+            materias_aprobadas.add(inscripcion.materia_comision.materia)
+
+    # Obtener materias con nota menor a 4
+    materias_no_aprobadas = set()
+    for inscripcion in inscripciones:
+        if inscripcion.nota is not None and inscripcion.nota < 4:
+            materias_no_aprobadas.add(inscripcion.materia_comision.materia)
+
     return render(request, "alumnos/materias.html", {
         "materias": materias,
+        "comisiones_inscritas": comisiones_inscritas,
         "materias_inscritas": materias_inscritas,
         "materias_aprobadas": materias_aprobadas,
-        "materias_menor": materias_menor
+        "materias_no_aprobadas": materias_no_aprobadas
     })
 
 @login_required
@@ -121,69 +135,61 @@ def detalle_materia(request, materia_id):
     comisiones = materia.materia_comisiones.all()
     alumno = Alumno.objects.get(user=request.user)
 
-    if Inscripcion.objects.filter(alumno=alumno, materia=materia).exists():
-        messages.info(request, "Ya estás inscrito en esta materia.")
-        return redirect("materias")
-    if Inscripcion.objects.filter(alumno=alumno, materia=materia, aprobado=True).exists():
-        messages.info(request, "Ya has aprobado esta materia.")
-        return redirect("materias")
-    
+    # Verificar si el alumno ya está inscrito en alguna comisión de la materia
+    if Inscripcion.objects.filter(alumno=alumno, materia_comision__materia=materia).exists():
+        inscripcion = Inscripcion.objects.filter(alumno=alumno, materia_comision__materia=materia).first()
+        if inscripcion.nota is None:
+            messages.info(request, "Ya estás inscrito en una comisión de esta materia.")
+            return redirect("materias")
+
     return render(request, "alumnos/detalle_materia.html", {
         "materia": materia,
         "comisiones": comisiones
     })
 
-@login_required
-def inscribir_materia(request, materia_id):
-    materia = Materia.objects.get(id=materia_id)
-    alumno = Alumno.objects.get(user=request.user)
-    
-    if Inscripcion.objects.filter(alumno=alumno, materia=materia).exists():
-        messages.info(request, "Ya estás inscrito en esta materia.")
-        return redirect("materias")
-    if Inscripcion.objects.filter(alumno=alumno, materia=materia, aprobado=True).exists():
-        messages.info(request, "Ya has aprobado esta materia.")
-        return redirect("materias")
-    else:
-        inscripcion = Inscripcion.objects.filter(alumno=alumno, materia=materia).first()
-        if inscripcion:
-            inscripcion.delete()
+def inscribir_comision(request, comision_id):
+    comision = get_object_or_404(MateriaComision, id=comision_id)
+    alumno = get_object_or_404(Alumno, user=request.user)
 
-        inscripcion = Inscripcion(alumno=alumno, materia=materia)
-        inscripcion.save()
-        messages.success(request, "Te has inscrito correctamente en la materia.")
-    
+    # Verificar si el alumno tiene una nota menor a 4 en alguna comisión de la misma materia
+    inscripcion_existente = Inscripcion.objects.filter(alumno=alumno, materia_comision__materia=comision.materia).first()
+    if inscripcion_existente:
+        if inscripcion_existente.nota is not None and inscripcion_existente.nota < 4:
+            inscripcion_existente.delete()
+        else:
+            messages.info(request, "Ya estás inscrito en una comisión de esta materia.")
+            return redirect("materias")
+
+
+    # Inscribir al alumno en la comisión seleccionada
+    inscripcion = Inscripcion(alumno=alumno, materia_comision=comision)
+    inscripcion.save()
+    messages.success(request, f"Te has inscrito correctamente en {comision.materia.nombre} - {comision.comision.nombre}.")
+
     return redirect("materias")
 
 
 @login_required
 def desinscribir_materia(request, materia_id):
-    materia = Materia.objects.get(id=materia_id)
-    alumno = Alumno.objects.get(user=request.user)
-    
-    inscripcion = Inscripcion.objects.filter(alumno=alumno, materia=materia).first()
-    if inscripcion:
-        inscripcion.delete()
-        messages.success(request, "Te has desinscrito correctamente de la materia.")
-    if Inscripcion.objects.filter(alumno=alumno, materia=materia, aprobado=True).exists():
+    """ Permite a un alumno desinscribirse de todas las comisiones de una materia. """
+    alumno = get_object_or_404(Alumno, user=request.user)
+    materia = get_object_or_404(Materia, id=materia_id)
+
+    # Buscar todas las inscripciones del alumno en cualquier comisión de la materia
+    inscripciones = Inscripcion.objects.filter(alumno=alumno, materia_comision__materia=materia)
+
+    if inscripciones.exists():
+        inscripciones.delete()
+        messages.success(request, f"Te has desinscrito correctamente de todas las comisiones de {materia.nombre}.")
+    elif Inscripcion.objects.filter(alumno=alumno, materia_comision__materia=materia, aprobado=True).exists():
         messages.info(request, "Ya has aprobado esta materia.")
     else:
-        messages.info(request, "No estas inscrito en esta materia.")
-    
+        messages.info(request, "No estás inscrito en ninguna comisión de esta materia.")
+
     return redirect("materias")
 
 @login_required
 def calificaciones(request):
-    alumno = request.user.alumno
+    alumno = get_object_or_404(Alumno, user=request.user)
     inscripciones = Inscripcion.objects.filter(alumno=alumno)
-    materias_inscritas = [inscripcion.materia for inscripcion in inscripciones if not inscripcion.aprobado]
-    materias_aprobadas = [inscripcion.materia for inscripcion in inscripciones if inscripcion.aprobado]
-    materias_no_aprobadas = [inscripcion.materia for inscripcion in inscripciones if inscripcion.nota is not None and inscripcion.nota < 4]
-
-
-    return render(request, "alumnos/calificaciones.html", {
-        "materias_inscritas": materias_inscritas,
-        "materias_aprobadas": materias_aprobadas,
-        "materias_no_aprobadas": materias_no_aprobadas,
-        "inscripciones": inscripciones
-    })
+    return render(request, "alumnos/calificaciones.html", {"inscripciones": inscripciones})
