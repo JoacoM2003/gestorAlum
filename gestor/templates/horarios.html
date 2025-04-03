@@ -8,14 +8,12 @@
         <div class="col">
             <h4>{{ dia }}</h4>
             <ul class="list-group">
-                {% for inscripcion in inscripciones %}
                 {% for horario in horarios_dia %}
                 <li class="list-group-item">
-                    Materia: {{ inscripcion.materia_comision.materia.nombre }} <br>
-                    Comisión: {{ inscripcion.materia_comision.comision.nombre }} <br>
+                    Materia: {{ horario.materiacomision_set.first.materia.nombre }} <br>
+                    Comisión: {{ horario.materiacomision_set.first.comision.nombre }} <br>
                     Hora: {{ horario.hora_inicio }} - {{ horario.hora_fin }}
                 </li>
-                {% endfor %}
                 {% endfor %}
             </ul>
         </div>

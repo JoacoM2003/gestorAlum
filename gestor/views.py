@@ -56,7 +56,7 @@ def signout(request):
 @login_required
 def perfil(request):
     if not request.user.is_authenticated:
-        return redirect("signin")
+        return redirect("home")
     if hasattr(request.user, 'alumno'):
         alumno = Alumno.objects.get(user=request.user)  # Obtener el Alumno asociado al usuario
 
@@ -120,6 +120,7 @@ def cambiar_contraseña(request):
     
     return render(request, "alumnos/cambiar_contraseña.html", {"form": form})
 
+@login_required
 def materias(request):
     if not request.user.is_authenticated:
         return redirect("signin")
@@ -265,20 +266,67 @@ def ingresar_nota(request):
         messages.success(request, "Nota ingresada correctamente.")
     return redirect("materias")
 
-
 @login_required
 def horarios(request):
-    alumno = get_object_or_404(Alumno, user=request.user)
-    inscripciones = Inscripcion.objects.filter(alumno=alumno)
-    horarios = Horario.objects.filter(materiacomision__in=[inscripcion.materia_comision for inscripcion in inscripciones])
-    horarios_dict = {
-        "Lunes": [],
-        "Martes": [],
-        "Miércoles": [],
-        "Jueves": [],
-        "Viernes": [],
-        "Sábado": [],
-    }
-    for horario in horarios:
-        horarios_dict[horario.dias].append(horario)
-    return render(request, "horarios.html", {"horarios": horarios_dict, "inscripciones": inscripciones})
+    if not request.user.is_authenticated:
+        return redirect("home")
+    if hasattr(request.user, 'alumno'):
+        alumno = get_object_or_404(Alumno, user=request.user)
+        
+        # Obtener todas las inscripciones del alumno
+        inscripciones = Inscripcion.objects.filter(alumno=alumno)
+
+        # Diccionario para agrupar los horarios por día
+        horarios_por_dia = {
+            "Lunes": [],
+            "Martes": [],
+            "Miércoles": [],
+            "Jueves": [],
+            "Viernes": [],
+            "Sábado": [],
+            "Domingo": []
+        }
+
+        for inscripcion in inscripciones:
+            materia_comision = inscripcion.materia_comision
+            if materia_comision and not inscripcion.aprobado:
+                for horario in materia_comision.horarios.all():
+                    horarios_por_dia[horario.dias].append(horario)
+
+        # Ordenar cada día por hora
+        for dia in horarios_por_dia.values():
+            dia.sort(key=lambda horario: horario.hora_inicio)
+
+        return render(request, "horarios.html", {
+            "horarios": horarios_por_dia
+        })
+    elif hasattr(request.user, 'profesor'):
+        profesor = get_object_or_404(Profesor, user=request.user)
+        
+        # Obtener todas las comisiones del profesor
+        inscripciones = RolProfesor.objects.filter(profesor=profesor)
+
+        # Diccionario para agrupar los horarios por día
+        horarios_por_dia = {
+            "Lunes": [],
+            "Martes": [],
+            "Miércoles": [],
+            "Jueves": [],
+            "Viernes": [],
+            "Sábado": [],
+            "Domingo": []
+        }
+
+        for inscripcion in inscripciones:
+            materia_comision = inscripcion.materia_comision
+            if materia_comision:
+                for horario in materia_comision.horarios.all():
+                    horarios_por_dia[horario.dias].append(horario)
+
+        # Ordenar cada día por hora
+        for dia in horarios_por_dia.values():
+            dia.sort(key=lambda horario: horario.hora_inicio)
+
+        return render(request, "horarios.html", {
+            "horarios": horarios_por_dia
+        })
