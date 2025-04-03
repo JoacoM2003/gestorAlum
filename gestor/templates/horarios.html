@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Horarios</h2>
+    <div class="row">
+        {% for dia, horarios_dia in horarios.items %}
+        <div class="col">
+            <h4>{{ dia }}</h4>
+            <ul class="list-group">
+                {% for inscripcion in inscripciones %}
+                {% for horario in horarios_dia %}
+                <li class="list-group-item">
+                    Materia: {{ inscripcion.materia_comision.materia.nombre }} <br>
+                    Comisión: {{ inscripcion.materia_comision.comision.nombre }} <br>
+                    Hora: {{ horario.hora_inicio }} - {{ horario.hora_fin }}
+                </li>
+                {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+

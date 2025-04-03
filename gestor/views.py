@@ -3,7 +3,7 @@ from .forms import SignUpForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Alumno, Materia, Inscripcion, MateriaComision, Profesor, RolProfesor
+from .models import Alumno, Materia, Inscripcion, MateriaComision, Profesor, RolProfesor, Horario
 from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 
@@ -200,8 +200,8 @@ def detalle_materia(request, materia_id):
 def detalle_comision(request, comision_id):
     comision = get_object_or_404(MateriaComision, id=comision_id)
     alumnos = Alumno.objects.filter(inscripcion__materia_comision=comision)
-    print(alumnos)
-    return render(request, "profesores/detalle_comision.html", {"comision": comision, "alumnos": alumnos})
+    inscripciones = Inscripcion.objects.filter(materia_comision=comision)
+    return render(request, "profesores/detalle_comision.html", {"comision": comision, "alumnos": alumnos, "inscripciones": inscripciones})
 
 @login_required
 def inscribir_comision(request, comision_id):
@@ -250,3 +250,35 @@ def calificaciones(request):
     alumno = get_object_or_404(Alumno, user=request.user)
     inscripciones = Inscripcion.objects.filter(alumno=alumno)
     return render(request, "alumnos/calificaciones.html", {"inscripciones": inscripciones})
+
+
+@login_required
+def ingresar_nota(request):
+    print(request.POST)
+    print(request.user)
+    if request.method == "POST":
+        inscripcion_id = request.POST.get("inscripcion_id")
+        nota = request.POST.get("nota")
+        inscripcion = Inscripcion.objects.get(id=inscripcion_id)
+        inscripcion.nota = int(nota)
+        inscripcion.save()
+        messages.success(request, "Nota ingresada correctamente.")
+    return redirect("materias")
+
+
+@login_required
+def horarios(request):
+    alumno = get_object_or_404(Alumno, user=request.user)
+    inscripciones = Inscripcion.objects.filter(alumno=alumno)
+    horarios = Horario.objects.filter(materiacomision__in=[inscripcion.materia_comision for inscripcion in inscripciones])
+    horarios_dict = {
+        "Lunes": [],
+        "Martes": [],
+        "Miércoles": [],
+        "Jueves": [],
+        "Viernes": [],
+        "Sábado": [],
+    }
+    for horario in horarios:
+        horarios_dict[horario.dias].append(horario)
+    return render(request, "horarios.html", {"horarios": horarios_dict, "inscripciones": inscripciones})

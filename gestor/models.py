@@ -91,7 +91,7 @@ class Inscripcion(models.Model):
     aprobado = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        if self.nota is not None and self.nota > 4:
+        if self.nota is not None and self.nota >= 4:
             self.aprobado = True
         else:
             self.aprobado = False

@@ -21,7 +21,6 @@
             {% if comision.horarios.exists %}
             <span class="text-muted"> | {% for horario in comision.horarios.all %} {{ horario }} |{% endfor %} </span>
             {% endif %}
-            <span class="text-muted"> ({{ comision.rolprofesor__rol }})</span>
             <a href="{% url 'detalle_comision' comision.id %}" class="btn btn-primary btn-sm">Ver Detalle</a>
         </li>
         {% endfor %}

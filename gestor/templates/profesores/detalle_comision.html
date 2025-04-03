@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Alumnos</h2>
+    <h2>Inscripciones</h2>
     
     <div class="row">
         <div class="col">
@@ -10,21 +10,45 @@
                 <thead>
                     <tr>
                         <th>Nombre</th>
-                        <th>apellido</th>
+                        <th>Apellido</th>
                         <th>Mail</th>
                         <th>Telefono</th>
+                        <th>Nota</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for alumno in alumnos %}
+                    {% for inscripcion in inscripciones %}
                     <tr>
-                        <td>{{ alumno.user.first_name }}</td>
-                        <td>{{ alumno.user.last_name }}</td>
-                        <td>{{ alumno.user.email }}</td>
-                        <td>{{ alumno.telefono }}</td>
+                        <td>{{ inscripcion.alumno.user.first_name }}</td>
+                        <td>{{ inscripcion.alumno.user.last_name }}</td>
+                        <td>{{ inscripcion.alumno.user.email }}</td>
+                        <td>{{ inscripcion.alumno.telefono }}</td>
+                        <td>{{ inscripcion.nota }}</td>
                         <td>
-                            <a href="" class="btn btn-info btn-sm">Ver Detalle</a>
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalNota-{{inscripcion.id}}">
+                                Ingresar Nota
+                            </button>
+                            <form action="{% url 'ingresar_nota' %}" method="POST" class="modal fade" id="modalNota-{{inscripcion.id}}" tabindex="-1" aria-labelledby="modalNota-{{inscripcion.id}}Label" aria-hidden="true">
+                                {% csrf_token %}
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="modalNota-{{inscripcion.id}}Label">Ingresar Nota</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Ingrese la nota para {{inscripcion.alumno.user.first_name}} {{inscripcion.alumno.user.last_name}}:</p>
+                                            <input type="number" name="nota" class="form-control" step="0.1" min="0" max="10" required>
+                                            <input type="hidden" name="inscripcion_id" value="{{inscripcion.id}}">
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-primary">Guardar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}
@@ -34,5 +58,4 @@
     </div>
 </div>
 {% endblock %}
-
 
