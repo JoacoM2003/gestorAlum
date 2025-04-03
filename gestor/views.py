@@ -3,7 +3,7 @@ from .forms import SignUpForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Alumno, Materia, Inscripcion, MateriaComision, Profesor
+from .models import Alumno, Materia, Inscripcion, MateriaComision, Profesor, RolProfesor
 from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 
@@ -121,52 +121,89 @@ def cambiar_contraseña(request):
     return render(request, "alumnos/cambiar_contraseña.html", {"form": form})
 
 def materias(request):
-    alumno = get_object_or_404(Alumno, user=request.user)
-    materias = Materia.objects.all()
+    if not request.user.is_authenticated:
+        return redirect("signin")
+    if hasattr(request.user, 'alumno'):
+        alumno = get_object_or_404(Alumno, user=request.user)
+        materias = Materia.objects.all()
 
-    # Obtener inscripciones del alumno
-    inscripciones = Inscripcion.objects.filter(alumno=alumno)
-    comisiones_inscritas = [insc.materia_comision.id for insc in inscripciones]
-    materias_inscritas = {insc.materia_comision.materia for insc in inscripciones}
-    
-    # Obtener materias aprobadas por el alumno
-    materias_aprobadas = set()
-    for inscripcion in inscripciones:
-        if inscripcion.aprobado:
-            materias_aprobadas.add(inscripcion.materia_comision.materia)
+        # Obtener inscripciones del alumno
+        inscripciones = Inscripcion.objects.filter(alumno=alumno)
+        comisiones_inscritas = [insc.materia_comision.id for insc in inscripciones]
+        materias_inscritas = {insc.materia_comision.materia for insc in inscripciones}
+        
+        # Obtener materias aprobadas por el alumno
+        materias_aprobadas = set()
+        for inscripcion in inscripciones:
+            if inscripcion.aprobado:
+                materias_aprobadas.add(inscripcion.materia_comision.materia)
 
-    # Obtener materias con nota menor a 4
-    materias_no_aprobadas = set()
-    for inscripcion in inscripciones:
-        if inscripcion.nota is not None and inscripcion.nota < 4:
-            materias_no_aprobadas.add(inscripcion.materia_comision.materia)
+        # Obtener materias con nota menor a 4
+        materias_no_aprobadas = set()
+        for inscripcion in inscripciones:
+            if inscripcion.nota is not None and inscripcion.nota < 4:
+                materias_no_aprobadas.add(inscripcion.materia_comision.materia)
 
-    return render(request, "alumnos/materias.html", {
-        "materias": materias,
-        "comisiones_inscritas": comisiones_inscritas,
-        "materias_inscritas": materias_inscritas,
-        "materias_aprobadas": materias_aprobadas,
-        "materias_no_aprobadas": materias_no_aprobadas
-    })
+        return render(request, "alumnos/materias.html", {
+            "materias": materias,
+            "comisiones_inscritas": comisiones_inscritas,
+            "materias_inscritas": materias_inscritas,
+            "materias_aprobadas": materias_aprobadas,
+            "materias_no_aprobadas": materias_no_aprobadas
+        })
+
+    elif hasattr(request.user, 'profesor'):
+        profesor = get_object_or_404(Profesor, user=request.user)
+        materias = Materia.objects.all()
+
+        # Obtener materias asignadas al profesor
+        roles = RolProfesor.objects.filter(profesor=profesor)
+        materias_asignadas = set(rol.materia_comision.materia for rol in roles)
+
+        return render(request, "profesores/materias.html", {
+            "materias": materias,
+            "materias_asignadas": materias_asignadas
+        })
 
 @login_required
 def detalle_materia(request, materia_id):
-    materia = Materia.objects.get(id=materia_id)
-    comisiones = materia.materia_comisiones.all()
-    alumno = Alumno.objects.get(user=request.user)
+    if not request.user.is_authenticated:
+        return redirect("signin")
+    if hasattr(request.user, 'alumno'):
+        materia = Materia.objects.get(id=materia_id)
+        comisiones = materia.materia_comisiones.all()
+        alumno = Alumno.objects.get(user=request.user)
 
-    # Verificar si el alumno ya está inscrito en alguna comisión de la materia
-    if Inscripcion.objects.filter(alumno=alumno, materia_comision__materia=materia).exists():
-        inscripcion = Inscripcion.objects.filter(alumno=alumno, materia_comision__materia=materia).first()
-        if inscripcion.nota is None:
-            messages.info(request, "Ya estás inscrito en una comisión de esta materia.")
-            return redirect("materias")
+        # Verificar si el alumno ya está inscrito en alguna comisión de la materia
+        if Inscripcion.objects.filter(alumno=alumno, materia_comision__materia=materia).exists():
+            inscripcion = Inscripcion.objects.filter(alumno=alumno, materia_comision__materia=materia).first()
+            if inscripcion.nota is None:
+                messages.info(request, "Ya estás inscrito en una comisión de esta materia.")
+                return redirect("materias")
 
-    return render(request, "alumnos/detalle_materia.html", {
-        "materia": materia,
-        "comisiones": comisiones
-    })
+        return render(request, "alumnos/detalle_materia.html", {
+            "materia": materia,
+            "comisiones": comisiones
+        })
 
+    elif hasattr(request.user, 'profesor'):
+        materia = Materia.objects.get(id=materia_id)
+        profesor = Profesor.objects.get(user=request.user)
+        comisiones = materia.materia_comisiones.filter(rolprofesor__profesor=profesor)
+        
+        return render(request, "profesores/detalle_materia.html", {
+            "materia": materia,
+            "comisiones": comisiones
+        })
+    
+@login_required
+def detalle_comision(request, comision_id):
+    comision = get_object_or_404(MateriaComision, id=comision_id)
+    alumnos = Alumno.objects.filter(inscripcion__materia_comision=comision)
+    print(alumnos)
+    return render(request, "profesores/detalle_comision.html", {"comision": comision, "alumnos": alumnos})
+
+@login_required
 def inscribir_comision(request, comision_id):
     comision = get_object_or_404(MateriaComision, id=comision_id)
     alumno = get_object_or_404(Alumno, user=request.user)

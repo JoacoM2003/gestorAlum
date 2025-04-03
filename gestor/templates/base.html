@@ -68,9 +68,13 @@
     <div class="sidebar">
         <h4 class="text-center">Panel</h4>
         <a href="{% url 'home' %}">Inicio</a>
+        {% if user.alumno %}
         <a href="{% url 'perfil' %}">Mi Perfil</a>
         <a href="{% url 'materias' %}">Inscripción a Materias</a>
         <a href="{% url 'calificaciones' %}">Calificaciones</a>
+        {% elif user.profesor %}
+        <a href="{% url 'materias' %}">Materias</a>
+        {% endif %}
         <a href="">Horarios</a>
         <a href="">Configuración</a>
         <a href="">Cerrar Sesión</a>

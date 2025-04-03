@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ materia.nombre }}</h2>
+    <p>{{ materia.descripcion }}</p>
+
+    {% if messages %}
+    <div class="alert alert-success">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <h3>Comisiones</h3>
+    <ul class="list-group">
+        {% for comision in comisiones %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>{{ comision.comision.nombre }}</strong>
+            {% if comision.horarios.exists %}
+            <span class="text-muted"> | {% for horario in comision.horarios.all %} {{ horario }} |{% endfor %} </span>
+            {% endif %}
+            <span class="text-muted"> ({{ comision.rolprofesor__rol }})</span>
+            <a href="{% url 'detalle_comision' comision.id %}" class="btn btn-primary btn-sm">Ver Detalle</a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'materias' %}" class="btn btn-secondary mt-3">Volver</a>
+</div>
+{% endblock %}
+

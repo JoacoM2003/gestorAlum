@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Alumnos</h2>
+    
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>apellido</th>
+                        <th>Mail</th>
+                        <th>Telefono</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alumno in alumnos %}
+                    <tr>
+                        <td>{{ alumno.user.first_name }}</td>
+                        <td>{{ alumno.user.last_name }}</td>
+                        <td>{{ alumno.user.email }}</td>
+                        <td>{{ alumno.telefono }}</td>
+                        <td>
+                            <a href="" class="btn btn-info btn-sm">Ver Detalle</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

@@ -29,6 +29,17 @@
             </div>
         </div>
 
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <label for="telefono" class="form-label">Teléfono</label>
+                <input type="text" class="form-control" id="telefono" name="telefono" value="{{ profesor.telefono }}">
+            </div>
+            <div class="col-md-6">
+                <label for="direccion" class="form-label">Dirección</label>
+                <input type="text" class="form-control" id="direccion" name="direccion" value="{{ profesor.direccion }}">
+            </div>
+        </div>
+
         <div class="mt-4">
             <button type="submit" class="btn btn-primary">Guardar cambios</button>
         </div>

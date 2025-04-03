@@ -89,7 +89,7 @@ class ProfesorForm(forms.ModelForm):
 
     class Meta:
         model = Profesor
-        fields = ['dni', 'legajo', 'first_name', 'last_name', 'email']
+        fields = ['dni', 'legajo', 'first_name', 'last_name', 'email', 'direccion', 'telefono']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

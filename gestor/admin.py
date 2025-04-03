@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
-from .models import Alumno, Materia, Comision, Inscripcion, Horario, Profesor, MateriaComision
+from .models import Alumno, Materia, Comision, Inscripcion, Horario, Profesor, MateriaComision, RolProfesor
 from .forms import AlumnoForm, ProfesorForm
 from django.utils.html import format_html
 
@@ -69,3 +69,4 @@ admin.site.register(Horario)
 
 admin.site.register(Inscripcion)
 
+admin.site.register(RolProfesor)

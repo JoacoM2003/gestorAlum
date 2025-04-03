@@ -15,12 +15,15 @@ class Alumno(models.Model):
     
 class Profesor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)
-    dni = models.CharField(max_length=100)
     legajo = models.CharField(max_length=100)
+    dni = models.CharField(max_length=100)
+    fecha_nacimiento = models.DateField(blank=True, null=True)
+    direccion = models.CharField(max_length=100, blank=True, null=True)
+    telefono = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
-    
+
 
 class Materia(models.Model):
     codigo = models.CharField(max_length=10, unique=True)
@@ -28,11 +31,10 @@ class Materia(models.Model):
     descripcion = models.TextField(blank=True)
     año = models.PositiveIntegerField(blank=True, null=True)
     creditos = models.PositiveIntegerField()
-    profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return self.nombre
-    
+
 class Comision(models.Model):
     nombre = models.CharField(max_length=100, blank=True, null=True)
 
@@ -65,6 +67,19 @@ class MateriaComision(models.Model):
 
     def __str__(self):
         return f"{self.materia.nombre} - {self.comision.nombre}"
+    
+
+class RolProfesor(models.Model):
+    ROL_CHOICES = [
+        ('Titular', 'Titular'),
+        ('Ayudante', 'Ayudante'),
+    ]
+    profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE)
+    materia_comision = models.ForeignKey(MateriaComision, on_delete=models.CASCADE, blank=True, null=True)
+    rol = models.CharField(max_length=100, choices=ROL_CHOICES)
+
+    def __str__(self):
+        return f"{self.profesor} - {self.materia_comision} - {self.rol}"
 
 
     
