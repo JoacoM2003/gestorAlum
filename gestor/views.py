@@ -218,7 +218,6 @@ def inscribir_comision(request, comision_id):
             messages.info(request, "Ya estás inscrito en una comisión de esta materia.")
             return redirect("materias")
 
-
     # Inscribir al alumno en la comisión seleccionada
     inscripcion = Inscripcion(alumno=alumno, materia_comision=comision)
     inscripcion.save()
@@ -330,3 +329,44 @@ def horarios(request):
         return render(request, "horarios.html", {
             "horarios": horarios_por_dia
         })
+
+
+@login_required
+def profesores(request):
+    profesores = Profesor.objects.all()
+    return render(request, "profesores/profesores.html", {"profesores": profesores})
+
+@login_required
+def detalle_profesor(request, profesor_id):
+    profesor = get_object_or_404(Profesor, id=profesor_id)
+    comisiones = RolProfesor.objects.filter(profesor=profesor)
+    return render(request, "profesores/detalle_profesor.html", {"profesor": profesor, "comisiones": comisiones})
+
+@login_required
+def asignar_profesores(request):
+    if request.method == "GET":
+        profesores = Profesor.objects.all()
+        comisiones = MateriaComision.objects.all()
+        roles = RolProfesor.ROL_CHOICES
+        return render(request, "asignar_profesor.html", {"profesores": profesores, "comisiones": comisiones, "roles": roles})
+    
+    if request.method == "POST":
+        profesor_id = request.POST.get("profesor")
+        comision_id = request.POST.get("comision")
+        rol = request.POST.get("rol_profesor")
+        profesor = Profesor.objects.get(id=profesor_id)
+        comision = MateriaComision.objects.get(id=comision_id)
+
+        if not RolProfesor.objects.filter(profesor=profesor, materia_comision=comision).exists():
+            RolProfesor.objects.create(profesor=profesor, materia_comision=comision, rol=rol)
+            messages.success(request, "Profesor asignado correctamente.")
+        else:
+            messages.warning(request, "El profesor ya está asignado a esta comisión.")
+        return redirect("profesores")
+    
+@login_required
+def eliminar_rol_profesor(request, rol_profesor_id):
+    rol_profesor = get_object_or_404(RolProfesor, id=rol_profesor_id)
+    rol_profesor.delete()
+    messages.success(request, "Profesor eliminado correctamente.")
+    return redirect("profesores")

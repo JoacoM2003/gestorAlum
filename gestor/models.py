@@ -68,6 +68,11 @@ class MateriaComision(models.Model):
     def __str__(self):
         return f"{self.materia.nombre} - {self.comision.nombre}"
     
+    @property
+    def inscriptos(self):
+        return self.inscripcion_set.count()
+
+    
 
 class RolProfesor(models.Model):
     ROL_CHOICES = [

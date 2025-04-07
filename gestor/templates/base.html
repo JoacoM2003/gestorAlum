@@ -76,6 +76,9 @@
         {% elif user.profesor %}
         <a href="{% url 'materias' %}">Materias</a>
         {% endif %}
+        {% if user.is_superuser %}
+        <a href="{% url 'profesores' %}">Profesores</a>
+        {% endif %}
         <a href="{% url 'horarios' %}">Horarios</a>
         <a href="">Configuración</a>
         <a href="">Cerrar Sesión</a>

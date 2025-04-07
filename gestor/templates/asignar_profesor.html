@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Mi Perfil</h2>
+    
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-md-6">
+                <label for="profesor" class="form-label">Profesor</label>
+                <select class="form-select" id="profesor" name="profesor">
+                    <option value="" selected>Seleccione un profesor</option>
+                    {% for profesor in profesores %}
+                    <option value="{{ profesor.id }}">{{ profesor.user.get_full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="comision" class="form-label">Comision Materia</label>
+                <select class="form-select" id="comision" name="comision">
+                    <option value="" selected>Seleccione una comision</option>
+                    {% for comision in comisiones %}
+                    <option value="{{comision.id}}">{{ comision.materia }} - {{ comision.comision }} ({{comision.id}})</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <label for="rol_profesor" class="form-label">Rol</label>
+                <select class="form-select" id="rol_profesor" name="rol_profesor">
+                    <option value="" selected>Rol</option>  
+                    {% for rol in roles %}
+                    <option value="{{rol.0}}">{{ rol.1 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
