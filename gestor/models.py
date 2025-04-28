@@ -12,7 +12,16 @@ class Alumno(models.Model):
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
-    
+
+    @property
+    def materias_inscritas(self):
+        return Inscripcion.objects.filter(alumno=self)
+
+    @property
+    def comisiones_asignadas(self):
+        return MateriaComision.objects.filter(inscripcion__alumno=self).distinct()
+
+
 class Profesor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)
     legajo = models.CharField(max_length=100)
@@ -23,6 +32,10 @@ class Profesor(models.Model):
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
+
+    @property
+    def comisiones_dictadas(self):
+        return MateriaComision.objects.filter(rolprofesor__profesor=self).distinct()
 
 
 class Materia(models.Model):
@@ -35,12 +48,14 @@ class Materia(models.Model):
     def __str__(self):
         return self.nombre
 
+
 class Comision(models.Model):
     nombre = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return self.nombre
-    
+
+
 class Horario(models.Model):
     DIAS_SEMANA = [
         ('Lunes', 'Lunes'),
@@ -51,13 +66,14 @@ class Horario(models.Model):
         ('Sábado', 'Sábado'),
         ('Domingo', 'Domingo'),
     ]
-    
+
     dias = models.CharField(max_length=100, choices=DIAS_SEMANA, blank=True)  # Día único
     hora_inicio = models.CharField()
     hora_fin = models.CharField()
 
     def __str__(self):
         return f"{self.dias} {self.hora_inicio} - {self.hora_fin}"
+
 
 class MateriaComision(models.Model):
     materia = models.ForeignKey(Materia, on_delete=models.CASCADE, related_name="materia_comisiones")
@@ -67,12 +83,15 @@ class MateriaComision(models.Model):
 
     def __str__(self):
         return f"{self.materia.nombre} - {self.comision.nombre}"
-    
+
     @property
-    def inscriptos(self):
+    def cantidad_inscriptos(self):
         return self.inscripcion_set.count()
 
-    
+    @property
+    def profesores(self):
+        return Profesor.objects.filter(rolprofesor__materia_comision=self)
+
 
 class RolProfesor(models.Model):
     ROL_CHOICES = [
@@ -87,7 +106,6 @@ class RolProfesor(models.Model):
         return f"{self.profesor} - {self.materia_comision} - {self.rol}"
 
 
-    
 class Inscripcion(models.Model):
     alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE)
     materia_comision = models.ForeignKey(MateriaComision, on_delete=models.CASCADE, blank=True, null=True)
@@ -96,12 +114,24 @@ class Inscripcion(models.Model):
     aprobado = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        if self.nota is not None and self.nota >= 4:
-            self.aprobado = True
-        else:
-            self.aprobado = False
+        self.aprobado = self.nota is not None and self.nota >= 4
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.alumno.legajo} - {self.materia_comision  }"
-    
+        return f"{self.alumno.legajo} - {self.materia_comision}"
+
+    @property
+    def alumno_instance(self):
+        return self.alumno
+
+    @property
+    def materia(self):
+        return self.materia_comision.materia if self.materia_comision else None
+
+    @property
+    def comision(self):
+        return self.materia_comision.comision if self.materia_comision else None
+
+    @property
+    def horarios(self):
+        return self.materia_comision.horarios.all() if self.materia_comision else []
