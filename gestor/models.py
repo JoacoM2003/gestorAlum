@@ -68,8 +68,8 @@ class Horario(models.Model):
     ]
 
     dias = models.CharField(max_length=100, choices=DIAS_SEMANA, blank=True)  # Día único
-    hora_inicio = models.CharField()
-    hora_fin = models.CharField()
+    hora_inicio = models.CharField(max_length=10)
+    hora_fin = models.CharField(max_length=10)
 
     def __str__(self):
         return f"{self.dias} {self.hora_inicio} - {self.hora_fin}"
