@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Profesores</h2>
+    <h2>Alumnos</h2>
     
     <div class="row">
         <div class="col">
@@ -12,18 +12,14 @@
                         <th>Legajo</th>
                         <th>Nombre</th>
                         <th>Apellido</th>
-                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for profesor in profesores %}
+                    {% for alumno in alumnos %}
                     <tr>
-                        <td>{{ profesor.legajo }}</td>
-                        <td>{{ profesor.user.first_name }}</td>
-                        <td>{{ profesor.user.last_name }}</td>
-                        <td>
-                            <a href="{% url 'detalle_profesor' profesor.id %}" class="btn btn-info btn-sm">Ver Detalle</a>
-                        </td>
+                        <td>{{ alumno.legajo }}</td>
+                        <td>{{ alumno.user.first_name }}</td>
+                        <td>{{ alumno.user.last_name }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -33,8 +29,7 @@
 
     <div class="row mt-3">
         <div class="col">
-            <a href="{% url 'agregar_profesor' %}" class="btn btn-primary">Agregar Profesor</a>
-            <a href="{% url 'asignar_profesor' %}" class="btn btn-primary">Asignar Profesor</a>
+            <a href="{% url 'agregar_alumno' %}" class="btn btn-primary">Agregar Alumno</a>
         </div>
     </div>
 </div>

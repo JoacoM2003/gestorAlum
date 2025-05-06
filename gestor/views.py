@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import SignUpForm
+from .forms import SignUpForm, AlumnoForm, ProfesorForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -17,6 +17,7 @@ def home(request):
     return render(request, 'home.html')
 
 def signup(request):
+    return redirect('home')
     if request.user.is_authenticated:
         return redirect('home')
     form = SignUpForm(request.POST or None)
@@ -101,6 +102,15 @@ def profesores(request):
     return render(request, "profesores/profesores.html", {"profesores": Profesor.objects.all()})
 
 @login_required
+def agregar_profesor(request):
+    form = ProfesorForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Profesor agregado correctamente.")
+        return redirect("profesores")
+    return render(request, "profesores/agregar_profesor.html", {"form": form})
+
+@login_required
 def detalle_profesor(request, profesor_id):
     profesor = get_object_or_404(Profesor, id=profesor_id)
     comisiones = RolProfesor.objects.filter(profesor=profesor)
@@ -131,6 +141,20 @@ def eliminar_rol_profesor(request, rol_profesor_id):
     get_object_or_404(RolProfesor, id=rol_profesor_id).delete()
     messages.success(request, "Profesor eliminado correctamente.")
     return redirect("profesores")
+
+def alumnos(request):
+    return render(request, "alumnos/alumnos.html", {"alumnos": Alumno.objects.all()})
+
+def agregar_alumno(request):
+    if request.method == "POST":
+        form = AlumnoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Alumno agregado correctamente.")
+            return redirect("alumnos")
+    else:
+        form = AlumnoForm()
+    return render(request, "alumnos/agregar_alumno.html", {"form": form})
 
 def materias(request):
     if not request.user.is_authenticated:
@@ -279,3 +303,11 @@ def horarios(request):
         horarios_por_dia[dia].sort(key=lambda h: h.hora_inicio)
 
     return render(request, "horarios.html", {"horarios": horarios_por_dia})
+
+@login_required
+def ver_materias(request):
+    return render(request, "ver_materias.html", {"materias": Materia.objects.all()})
+
+@login_required
+def agregar_materia(request):
+    pass

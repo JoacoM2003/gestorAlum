@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Materias</h2>
+    
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Año</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for materia in materias %}
+                    <tr>
+                        <td>{{ materia.codigo }}</td>
+                        <td>{{ materia.nombre }}</td>
+                        <td>{{ materia.año }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col">
+            <a href="{% url 'agregar_materia' %}" class="btn btn-primary">Agregar Materia</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

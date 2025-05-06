@@ -56,7 +56,6 @@
                 <ul class="navbar-nav ms-auto">
                     {% if not user.is_authenticated %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'signin' %}">Iniciar Sesión</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'signup' %}">Registrarse</a></li>
                     {% else %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'signout' %}">Cerrar Sesión</a></li>
                     {% endif %}
@@ -78,6 +77,8 @@
         {% endif %}
         {% if user.is_superuser %}
         <a href="{% url 'profesores' %}">Profesores</a>
+        <a href="{% url 'alumnos' %}">Alumnos</a>
+        <a href="{% url 'ver_materias' %}">Materias</a>
         {% endif %}
         <a href="{% url 'horarios' %}">Horarios</a>
         <a href="">Configuración</a>
