@@ -68,9 +68,3 @@ http://localhost:8000/admin
 Puedes ver una demo del proyecto en funcionamiento en el siguiente enlace:
 
 [Demo del GestorAlum](https://gestoralum.onrender.com/)  
-
-> *(Si tienes un hosting o URL real para la demo, reemplaza este link por el de la demo en línea)*
-
-## 📄 Licencia
-
-Este proyecto está bajo la licencia MIT. Consulte el archivo LICENSE para más detalles.
