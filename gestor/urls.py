@@ -31,4 +31,11 @@ urlpatterns = [
 
     path('ver_materias', views.ver_materias, name='ver_materias'),
     path('agregar_materia', views.agregar_materia, name='agregar_materia'),
+    path('materia/<int:materia_id>', views.ver_materia, name='ver_materia'),
+    path('agregar_comision/', views.agregar_comision, name='agregar_comision'),
+    path('limpiar-comision/<int:comision_id>/', views.limpiar_comision, name='limpiar_comision'),
+        # Agregar a urls.py:
+    path('toggle-alumno/<int:alumno_id>/', views.toggle_alumno, name='toggle_alumno'),
+    path('toggle-profesor/<int:profesor_id>/', views.toggle_profesor, name='toggle_profesor'),
+
 ]

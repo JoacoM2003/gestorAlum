@@ -56,6 +56,8 @@ class LoginForm(forms.Form):
         self.fields['password'].help_text = 'Required. 8 characters or fewer. Letters, digits and @/./+/-/_ only.'
 
 
+from django.forms import DateInput
+
 class AlumnoForm(forms.ModelForm):
     first_name = forms.CharField(label="Nombre", max_length=30, required=True)
     last_name = forms.CharField(label="Apellido", max_length=30, required=True)
@@ -64,23 +66,31 @@ class AlumnoForm(forms.ModelForm):
     class Meta:
         model = Alumno
         fields = ['dni', 'fecha_nacimiento', 'direccion', 'telefono', 'legajo', 'first_name', 'last_name', 'email']
+        widgets = {
+            'fecha_nacimiento': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance and self.instance.user:  # Si el Alumno ya tiene un User
+        for name, field in self.fields.items():
+            if name != 'fecha_nacimiento':  # Ya lo seteamos en widgets
+                field.widget.attrs.update({'class': 'form-control'})
+
+        if self.instance and self.instance.user:
             self.fields['first_name'].initial = self.instance.user.first_name
             self.fields['last_name'].initial = self.instance.user.last_name
             self.fields['email'].initial = self.instance.user.email
 
     def save(self, commit=True):
         alumno = super().save(commit=False)
-        if alumno.user:  # Si ya tiene usuario, actualizamos sus datos
+        if alumno.user:
             alumno.user.first_name = self.cleaned_data['first_name']
             alumno.user.last_name = self.cleaned_data['last_name']
             alumno.user.email = self.cleaned_data['email']
             alumno.user.save()
         return alumno
-    
+
+
 
 class ProfesorForm(forms.ModelForm):
     first_name = forms.CharField(label="Nombre", max_length=30, required=True)
@@ -93,14 +103,18 @@ class ProfesorForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance and self.instance.user:  # Si el Profesor ya tiene un User
+        # Aplicar clase de Bootstrap a todos los campos
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})
+
+        if self.instance and self.instance.user:
             self.fields['first_name'].initial = self.instance.user.first_name
             self.fields['last_name'].initial = self.instance.user.last_name
             self.fields['email'].initial = self.instance.user.email
 
     def save(self, commit=True):
         profesor = super().save(commit=False)
-        if profesor.user:  # Si ya tiene usuario, actualizamos sus datos
+        if profesor.user:
             profesor.user.first_name = self.cleaned_data['first_name']
             profesor.user.last_name = self.cleaned_data['last_name']
             profesor.user.email = self.cleaned_data['email']

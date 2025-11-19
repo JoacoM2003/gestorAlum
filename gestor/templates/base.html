@@ -4,91 +4,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Home - Administración Educativa{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>{% block title %}Sistema Educativo{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#7C3AED',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            padding-top: 56px; /* Ajuste para la navbar fija */
-        }
-        .sidebar {
-            width: 250px;
-            height: calc(100vh - 56px); /* Ajustar altura restando la navbar */
-            background-color: #343a40;
-            color: white;
-            padding-top: 20px;
-            position: fixed;
-            top: 56px; /* Ajustar para que empiece debajo de la navbar */
-            left: 0;
-            bottom: 0;
-        }
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            padding: 10px;
-            display: block;
-        }
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-        .content {
-            flex-grow: 1;
-            padding: 20px;
-            margin-left: 250px;
-        }
-        .navbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.9); }
+        .sidebar-link { transition: all 0.3s ease; }
+        .sidebar-link:hover { transform: translateX(5px); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .toast { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
     </style>
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'home' %}">Sistema Educativo</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    {% if not user.is_authenticated %}
-                    <li class="nav-item"><a class="nav-link" href="{% url 'signin' %}">Iniciar Sesión</a></li>
-                    {% else %}
-                    <li class="nav-item"><a class="nav-link" href="{% url 'signout' %}">Cerrar Sesión</a></li>
-                    {% endif %}
-                </ul>
+<body class="bg-gray-50">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 z-40 h-screen w-64 transition-transform -translate-x-full lg:translate-x-0">
+        <div class="h-full px-3 py-4 overflow-y-auto gradient-bg">
+            <!-- Logo -->
+            <div class="mb-8 px-4 py-6 text-center">
+                <div class="w-16 h-16 mx-auto mb-3 bg-white rounded-full flex items-center justify-center">
+                    <i class="fas fa-graduation-cap text-3xl text-indigo-600"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white">Sistema Educativo</h2>
+                {% if user.is_authenticated %}
+                <p class="text-indigo-200 text-sm mt-1">{{ user.get_full_name|default:user.username }}</p>
+                {% endif %}
             </div>
+
+            <!-- Navigation -->
+            <ul class="space-y-2">
+                <li>
+                    <a href="{% url 'home' %}" class="sidebar-link flex items-center p-3 text-white rounded-lg hover:bg-white/20">
+                        <i class="fas fa-home w-5"></i>
+                        <span class="ml-3">Inicio</span>
+                    </a>
+                </li>
+
+                {% if user.is_authenticated %}
+                    {% if user.alumno %}
+                        <li class="pt-4 pb-2">
+                            <span class="px-3 text-xs font-semibold text-indigo-200 uppercase">Alumno</span>
+                        </li>
+                        <li>
+                            <a href="{% url 'perfil' %}" class="sidebar-link flex items-center p-3 text-white rounded-lg hover:bg-white/20">
+                                <i class="fas fa-user w-5"></i>
+                                <span class="ml-3">Mi Perfil</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'materias' %}" class="sidebar-link flex items-center p-3 text-white rounded-lg hover:bg-white/20">
+                                <i class="fas fa-book w-5"></i>
+                                <span class="ml-3">Mis Materias</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'calificaciones' %}" class="sidebar-link flex items-center p-3 text-white rounded-lg hover:bg-white/20">
+                                <i class="fas fa-chart-line w-5"></i>
+                                <span class="ml-3">Calificaciones</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'horarios' %}" class="sidebar-link flex items-center p-3 text-white rounded-lg hover:bg-white/20">
+                                <i class="fas fa-calendar-alt w-5"></i>
+                                <span class="ml-3">Horarios</span>
+                            </a>
+                        </li>
+                    {% elif user.profesor %}
+                        <li class="pt-4 pb-2">
+                            <span class="px-3 text-xs font-semibold text-indigo-200 uppercase">Profesor</span>
+                        </li>
+                        <li>
+                            <a href="{% url 'perfil' %}" class="sidebar-link flex items-center p-3 text-white rounded-lg hover:bg-white/20">
+                                <i class="fas fa-user w-5"></i>
+                                <span class="ml-3">Mi Perfil</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'materias' %}" class="sidebar-link flex items-center p-3 text-white rounded-lg hover:bg-white/20">
+                                <i class="fas fa-chalkboard-teacher w-5"></i>
+                                <span class="ml-3">Mis Materias</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'horarios' %}" class="sidebar-link flex items-center p-3 text-white rounded-lg hover:bg-white/20">
+                                <i class="fas fa-calendar-alt w-5"></i>
+                                <span class="ml-3">Horarios</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% if user.is_superuser %}
+                        <li class="pt-4 pb-2">
+                            <span class="px-3 text-xs font-semibold text-indigo-200 uppercase">Administración</span>
+                        </li>
+                        <li>
+                            <a href="{% url 'alumnos' %}" class="sidebar-link flex items-center p-3 text-white rounded-lg hover:bg-white/20">
+                                <i class="fas fa-user-graduate w-5"></i>
+                                <span class="ml-3">Alumnos</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'profesores' %}" class="sidebar-link flex items-center p-3 text-white rounded-lg hover:bg-white/20">
+                                <i class="fas fa-chalkboard-teacher w-5"></i>
+                                <span class="ml-3">Profesores</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'ver_materias' %}" class="sidebar-link flex items-center p-3 text-white rounded-lg hover:bg-white/20">
+                                <i class="fas fa-book-open w-5"></i>
+                                <span class="ml-3">Materias</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+
+            <!-- Logout -->
+            {% if user.is_authenticated %}
+            <div class="absolute bottom-4 left-0 right-0 px-3">
+                <a href="{% url 'signout' %}" class="flex items-center p-3 text-white rounded-lg hover:bg-red-500/30 transition">
+                    <i class="fas fa-sign-out-alt w-5"></i>
+                    <span class="ml-3">Cerrar Sesión</span>
+                </a>
+            </div>
+            {% endif %}
         </div>
-    </nav>
-    
-    <div class="sidebar">
-        <h4 class="text-center">Panel</h4>
-        <a href="{% url 'home' %}">Inicio</a>
-        {% if user.is_authenticated %}
-        {% if user.alumno %}
-        <a href="{% url 'perfil' %}">Mi Perfil</a>
-        <a href="{% url 'materias' %}">Inscripción a Materias</a>
-        <a href="{% url 'calificaciones' %}">Calificaciones</a>
-        {% elif user.profesor %}
-        <a href="{% url 'materias' %}">Materias</a>
+    </aside>
+
+    <!-- Mobile menu button -->
+    <button id="menuButton" class="lg:hidden fixed top-4 left-4 z-50 p-2 text-gray-600 bg-white rounded-lg shadow-lg">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <!-- Main Content -->
+    <div class="lg:ml-64">
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm sticky top-0 z-30">
+            <div class="px-4 py-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        {% block page_title %}Dashboard{% endblock %}
+                    </h1>
+                    <div class="flex items-center space-x-4">
+                        {% if user.is_authenticated %}
+                        <div class="flex items-center space-x-3">
+                            <div class="text-right">
+                                <p class="text-sm font-medium text-gray-900">{{ user.get_full_name|default:user.username }}</p>
+                                <p class="text-xs text-gray-500">
+                                    {% if user.alumno %}Alumno{% elif user.profesor %}Profesor{% elif user.is_superuser %}Administrador{% endif %}
+                                </p>
+                            </div>
+                            <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+                                {{ user.first_name.0|default:user.username.0|upper }}
+                            </div>
+                        </div>
+                        {% else %}
+                        <a href="{% url 'signin' %}" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+                            Iniciar Sesión
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Messages/Alerts -->
+        {% if messages %}
+        <div id="messages" class="fixed top-20 right-4 z-50 space-y-2">
+            {% for message in messages %}
+            <div class="toast max-w-sm bg-white rounded-lg shadow-lg p-4 flex items-center space-x-3 border-l-4 
+                {% if message.tags == 'success' %}border-green-500{% elif message.tags == 'error' %}border-red-500{% elif message.tags == 'warning' %}border-yellow-500{% else %}border-blue-500{% endif %}">
+                <i class="fas 
+                    {% if message.tags == 'success' %}fa-check-circle text-green-500
+                    {% elif message.tags == 'error' %}fa-exclamation-circle text-red-500
+                    {% elif message.tags == 'warning' %}fa-exclamation-triangle text-yellow-500
+                    {% else %}fa-info-circle text-blue-500{% endif %}"></i>
+                <p class="text-sm text-gray-700">{{ message }}</p>
+                <button onclick="this.parentElement.remove()" class="ml-auto text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
         {% endif %}
-        {% if user.is_superuser %}
-        <a href="{% url 'profesores' %}">Profesores</a>
-        <a href="{% url 'alumnos' %}">Alumnos</a>
-        <a href="{% url 'ver_materias' %}">Materias</a>
-        {% endif %}
-        <a href="{% url 'horarios' %}">Horarios</a>
-        <a href="">Configuración</a>
-        <a href="">Cerrar Sesión</a>
-        {% endif %}
+
+        <!-- Page Content -->
+        <main class="p-4 sm:p-6 lg:p-8">
+            {% block content %}
+            {% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-gray-200 mt-12">
+            <div class="px-4 py-6 sm:px-6 lg:px-8">
+                <p class="text-center text-sm text-gray-500">
+                    © 2024 Sistema de Administración Educativa. Todos los derechos reservados.
+                </p>
+            </div>
+        </footer>
     </div>
-    <div class="content">
-        {% block content %}
-        {% endblock %}
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Mobile menu toggle
+        const menuButton = document.getElementById('menuButton');
+        const sidebar = document.getElementById('sidebar');
+        
+        if (menuButton) {
+            menuButton.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+        }
+
+        // Auto-hide messages after 5 seconds
+        setTimeout(() => {
+            const messages = document.getElementById('messages');
+            if (messages) {
+                messages.style.opacity = '0';
+                setTimeout(() => messages.remove(), 300);
+            }
+        }, 5000);
+    </script>
 </body>
 </html>

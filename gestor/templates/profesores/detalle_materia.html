@@ -1,32 +1,192 @@
 {% extends "base.html" %}
 
-{% block content %}
-<div class="container mt-4">
-    <h2>{{ materia.nombre }}</h2>
-    <p>{{ materia.descripcion }}</p>
+{% block page_title %}{{ materia.nombre }}{% endblock %}
 
-    {% if messages %}
-    <div class="alert alert-success">
-        {% for message in messages %}
-        <p>{{ message }}</p>
-        {% endfor %}
+{% block content %}
+<div class="space-y-6">
+    <!-- Back Button -->
+    <a href="{% url 'materias' %}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-medium transition">
+        <i class="fas fa-arrow-left mr-2"></i>
+        Volver a Mis Materias
+    </a>
+
+    <!-- Materia Info Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="gradient-bg p-8 text-white">
+            <div class="flex items-start justify-between">
+                <div>
+                    <span class="inline-block px-4 py-1 bg-white/20 backdrop-blur rounded-full text-sm font-semibold mb-3">
+                        {{ materia.codigo }}
+                    </span>
+                    <h1 class="text-4xl font-bold mb-2">{{ materia.nombre }}</h1>
+                    <p class="text-indigo-100 text-lg">{{ materia.descripcion|default:"Sin descripción disponible" }}</p>
+                </div>
+                <div class="text-right">
+                    <div class="bg-white/20 backdrop-blur rounded-lg p-4 min-w-[100px]">
+                        <p class="text-5xl font-bold">{{ materia.año }}°</p>
+                        <p class="text-indigo-100 text-sm mt-1">Año</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6">
+            <div class="flex flex-wrap gap-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-award text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Créditos</p>
+                        <p class="text-lg font-bold text-gray-900">{{ materia.creditos }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-users text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Mis Comisiones</p>
+                        <p class="text-lg font-bold text-gray-900">{{ comisiones|length }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comisiones Section -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+            <i class="fas fa-list-ul mr-3 text-indigo-600"></i>
+            Comisiones Asignadas
+        </h2>
+
+        {% if comisiones %}
+        <div class="grid gap-4">
+            {% for comision in comisiones %}
+            <div class="card-hover border-2 border-gray-200 hover:border-indigo-300 rounded-xl overflow-hidden transition">
+                <!-- Comision Header -->
+                <div class="p-5 bg-gradient-to-br from-indigo-50 to-purple-50">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                                {{ forloop.counter }}
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900">Comisión {{ comision.comision.nombre }}</h3>
+                                <p class="text-sm text-gray-600">{{ comision.materia.nombre }}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Role Badge -->
+                        {% for rol in comision.rolprofesor_set.all %}
+                            {% if rol.profesor.user == user %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
+                                {% if rol.rol == 'Titular' %}
+                                    bg-indigo-100 text-indigo-800
+                                {% else %}
+                                    bg-purple-100 text-purple-800
+                                {% endif %}">
+                                <i class="fas fa-chalkboard-teacher mr-1"></i>
+                                {{ rol.rol }}
+                            </span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Horarios -->
+                    {% if comision.horarios.exists %}
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        {% for horario in comision.horarios.all %}
+                        <span class="inline-flex items-center px-3 py-1 bg-white text-indigo-700 rounded-lg text-sm border border-indigo-200">
+                            <i class="fas fa-clock mr-2"></i>
+                            <strong class="mr-1">{{ horario.dias }}:</strong>
+                            {{ horario.hora_inicio }} - {{ horario.hora_fin }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-sm text-gray-500 italic mb-3">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Sin horarios asignados
+                    </p>
+                    {% endif %}
+
+                    <!-- Stats -->
+                    <div class="flex items-center gap-6 text-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-users mr-2 text-gray-400"></i>
+                            <span class="text-gray-600">
+                                <strong class="text-gray-900">{{ comision.cantidad_inscriptos }}</strong> / {{ comision.cupo_maximo }} inscriptos
+                            </span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-600" 
+                                     style="width: {% widthratio comision.cantidad_inscriptos comision.cupo_maximo 100 %}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comision Actions -->
+                <div class="p-5 bg-white border-t border-gray-200">
+                    <div class="flex gap-3">
+                        <a href="{% url 'detalle_comision' comision.id %}" 
+                           class="flex-1 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-semibold text-center transition transform hover:scale-[1.02] shadow-lg">
+                            <i class="fas fa-users mr-2"></i>
+                            Ver Alumnos ({{ comision.cantidad_inscriptos }})
+                        </a>
+                        <button class="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold transition">
+                            <i class="fas fa-chart-bar"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">No tienes comisiones asignadas</h3>
+            <p class="text-gray-600">Aún no te han asignado comisiones para esta materia.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Other Professors -->
+    {% if comisiones %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-user-friends mr-2 text-indigo-600"></i>
+            Otros Profesores
+        </h3>
+        
+        <div class="space-y-3">
+            {% for comision in comisiones %}
+                {% for rol in comision.rolprofesor_set.all %}
+                    {% if rol.profesor.user != user %}
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-3">
+                                {{ rol.profesor.user.first_name.0 }}{{ rol.profesor.user.last_name.0 }}
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900">
+                                    {{ rol.profesor.user.get_full_name }}
+                                </p>
+                                <p class="text-sm text-gray-500">Comisión {{ comision.comision.nombre }}</p>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
+                            {{ rol.rol }}
+                        </span>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </div>
     </div>
     {% endif %}
-
-    <h3>Comisiones</h3>
-    <ul class="list-group">
-        {% for comision in comisiones %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            <strong>{{ comision.comision.nombre }}</strong>
-            {% if comision.horarios.exists %}
-            <span class="text-muted"> | {% for horario in comision.horarios.all %} {{ horario }} |{% endfor %} </span>
-            {% endif %}
-            <a href="{% url 'detalle_comision' comision.id %}" class="btn btn-primary btn-sm">Ver Detalle</a>
-        </li>
-        {% endfor %}
-    </ul>
-
-    <a href="{% url 'materias' %}" class="btn btn-secondary mt-3">Volver</a>
 </div>
 {% endblock %}
-

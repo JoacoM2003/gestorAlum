@@ -1,42 +1,205 @@
 {% extends "base.html" %}
 
+{% block page_title %}Mis Calificaciones{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>Calificaciones</h2>
-    
-    <div class="row">
-        <div class="col">
-            <table class="table table-striped">
-                <thead>
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Mis Calificaciones</h2>
+                <p class="text-gray-600">Historial completo de calificaciones y estado académico</p>
+            </div>
+            <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition">
+                <i class="fas fa-download mr-2"></i>
+                Exportar
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fas fa-book-open text-2xl text-blue-600"></i>
+                <span class="text-xs font-semibold text-gray-500 uppercase">Total</span>
+            </div>
+            <p class="text-3xl font-bold text-gray-900">{{ total|default:inscripciones|length }}</p>
+            <p class="text-sm text-gray-600 mt-1">Materias cursadas</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fas fa-check-circle text-2xl text-green-600"></i>
+                <span class="text-xs font-semibold text-gray-500 uppercase">Aprobadas</span>
+            </div>
+            <p class="text-3xl font-bold text-green-600">{{ aprobadas|default:0 }}</p>
+            <p class="text-sm text-gray-600 mt-1">Con nota ≥ 4</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fas fa-clock text-2xl text-yellow-600"></i>
+                <span class="text-xs font-semibold text-gray-500 uppercase">Cursando</span>
+            </div>
+            <p class="text-3xl font-bold text-yellow-600">{{ cursando|default:0 }}</p>
+            <p class="text-sm text-gray-600 mt-1">En progreso</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fas fa-chart-line text-2xl text-purple-600"></i>
+                <span class="text-xs font-semibold text-gray-500 uppercase">Promedio</span>
+            </div>
+            <p class="text-3xl font-bold text-purple-600">{{ promedio|default:"-" }}</p>
+            <p class="text-sm text-gray-600 mt-1">General</p>
+        </div>
+    </div>
+
+    <!-- Calificaciones Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-table mr-3 text-indigo-600"></i>
+                Historial Académico
+            </h3>
+        </div>
+
+        {% if inscripciones %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th>Código</th>
-                        <th>Nombre</th>
-                        <th>Comisión</th>
-                        <th>Año</th>
-                        <th>Nota</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Código
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Materia
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Comisión
+                        </th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Año
+                        </th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Nota
+                        </th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Estado
+                        </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-200">
                     {% for inscripcion in inscripciones %}
-                    <tr>
-                        <td>{{ inscripcion.materia_comision.materia.codigo }}</td>
-                        <td>{{ inscripcion.materia_comision.materia.nombre }}</td>
-                        <td>{{ inscripcion.materia_comision.comision.nombre }}</td>
-                        <td>{{ inscripcion.materia_comision.materia.año }}</td>
-                        
-                        {% if inscripcion.aprobado %}
-                        <td>{{ inscripcion.nota }}</td>
-                        {% elif inscripcion.nota < 4 %}
-                        <td>{{  inscripcion.nota }}</td>
-                        {% else %}
-                        <td>Cursando</td>
-                        {% endif %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
+                                {{ inscripcion.materia_comision.materia.codigo }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold mr-3">
+                                    {{ inscripcion.materia_comision.materia.nombre.0 }}
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-900">{{ inscripcion.materia_comision.materia.nombre }}</p>
+                                    <p class="text-sm text-gray-500">{{ inscripcion.materia_comision.materia.creditos }} créditos</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-sm text-gray-700">{{ inscripcion.materia_comision.comision.nombre }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="text-lg font-bold text-gray-900">{{ inscripcion.materia_comision.materia.año }}°</span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            {% if inscripcion.aprobado %}
+                                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white font-bold text-xl shadow-lg">
+                                    {{ inscripcion.nota }}
+                                </div>
+                            {% elif inscripcion.nota and inscripcion.nota < 4 %}
+                                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white font-bold text-xl shadow-lg">
+                                    {{ inscripcion.nota }}
+                                </div>
+                            {% else %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                    <i class="fas fa-spinner mr-1"></i>
+                                    Pendiente
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            {% if inscripcion.aprobado %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    Aprobada
+                                </span>
+                            {% elif inscripcion.nota and inscripcion.nota < 4 %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                                    <i class="fas fa-times-circle mr-1"></i>
+                                    No Aprobada
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                                    <i class="fas fa-book-reader mr-1"></i>
+                                    Cursando
+                                </span>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <div class="p-12 text-center">
+            <i class="fas fa-clipboard-list text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Sin calificaciones registradas</h3>
+            <p class="text-gray-600 mb-6">Aún no tienes materias con calificaciones.</p>
+            <a href="{% url 'materias' %}" class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition">
+                <i class="fas fa-plus-circle mr-2"></i>
+                Inscribirse a Materias
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Legend -->
+    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6">
+        <h4 class="font-semibold text-gray-900 mb-4">Leyenda de Estados</h4>
+        <div class="grid md:grid-cols-3 gap-4 text-sm">
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold mr-3">
+                    ✓
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900">Aprobada</p>
+                    <p class="text-gray-600">Nota igual o mayor a 4</p>
+                </div>
+            </div>
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white font-bold mr-3">
+                    ✗
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900">No Aprobada</p>
+                    <p class="text-gray-600">Nota menor a 4</p>
+                </div>
+            </div>
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold mr-3">
+                    ⋯
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900">Cursando</p>
+                    <p class="text-gray-600">Sin nota asignada aún</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
-

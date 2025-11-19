@@ -1,15 +1,128 @@
 {% extends "base.html" %}
 
+{% block page_title %}Modificar Usuario{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>Modificar Usuario</h2>
-    
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        
-        <button type="submit" class="btn btn-primary">Guardar cambios</button>
-        <a href="{% url 'perfil' %}" class="btn btn-secondary">Cancelar</a>
-    </form>
+<div class="max-w-2xl mx-auto space-y-6">
+    <!-- Back Button -->
+    <a href="{% url 'perfil' %}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-medium transition">
+        <i class="fas fa-arrow-left mr-2"></i>
+        Volver al Perfil
+    </a>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <!-- Header -->
+        <div class="gradient-bg p-6">
+            <div class="flex items-center">
+                <div class="w-14 h-14 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-user-edit text-3xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-white">Modificar Usuario</h1>
+                    <p class="text-indigo-100">Actualiza tu nombre de usuario y configuración</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form method="POST" class="p-6 space-y-6">
+            {% csrf_token %}
+            
+            <!-- Info Message -->
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                <div class="flex">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-3"></i>
+                    <div>
+                        <p class="text-sm text-blue-700 font-medium mb-1">Nota Importante</p>
+                        <p class="text-sm text-blue-600">
+                            Cambiar tu nombre de usuario afectará cómo inicias sesión en el sistema. Asegúrate de recordar el nuevo nombre de usuario.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Render Django Form -->
+            <div class="space-y-6">
+                {% for field in form %}
+                    {% if not field.is_hidden %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {% if 'username' in field.name %}
+                                <i class="fas fa-user mr-1 text-gray-400"></i>
+                            {% elif 'email' in field.name %}
+                                <i class="fas fa-envelope mr-1 text-gray-400"></i>
+                            {% elif 'first' in field.name %}
+                                <i class="fas fa-id-card mr-1 text-gray-400"></i>
+                            {% elif 'last' in field.name %}
+                                <i class="fas fa-id-card mr-1 text-gray-400"></i>
+                            {% elif 'password' in field.name %}
+                                <i class="fas fa-lock mr-1 text-gray-400"></i>
+                            {% else %}
+                                <i class="fas fa-cog mr-1 text-gray-400"></i>
+                            {% endif %}
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+                        </label>
+                        
+                        {{ field }}
+                        
+                        {% if field.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ field.errors.0 }}</p>
+                        {% endif %}
+                        
+                        {% if field.help_text %}
+                            <p class="mt-1 text-xs text-gray-500">{{ field.help_text|safe }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- Warning about Password Field -->
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                <div class="flex">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 mt-0.5 mr-3"></i>
+                    <div>
+                        <p class="text-sm text-yellow-700 font-medium mb-1">Campo de Contraseña</p>
+                        <p class="text-sm text-yellow-600">
+                            Por seguridad, no puedes cambiar tu contraseña desde aquí. Por favor, déjalo en blanco o usa el botón "Cambiar Contraseña" en tu perfil.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 pt-4">
+                <button 
+                    type="submit" 
+                    class="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-semibold transition transform hover:scale-[1.02] shadow-lg">
+                    <i class="fas fa-save mr-2"></i>
+                    Guardar Cambios
+                </button>
+                <a href="{% url 'perfil' %}" 
+                   class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Help Card -->
+    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-100">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-question-circle text-white text-xl"></i>
+            </div>
+            <div>
+                <h4 class="font-bold text-gray-900 mb-2">¿Necesitas ayuda?</h4>
+                <p class="text-sm text-gray-700">
+                    Si tienes problemas para modificar tu usuario o necesitas recuperar tu cuenta, 
+                    contacta al administrador del sistema.
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

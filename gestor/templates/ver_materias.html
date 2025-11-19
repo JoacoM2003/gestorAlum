@@ -1,37 +1,199 @@
 {% extends "base.html" %}
 
+{% block page_title %}Gestión de Materias{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>Materias</h2>
-    
-    <div class="row">
-        <div class="col">
-            <table class="table table-striped">
-                <thead>
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Gestión de Materias</h2>
+                <p class="text-gray-600">Administra el catálogo de materias y comisiones</p>
+            </div>
+            <a href="{% url 'agregar_materia' %}" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-semibold transition transform hover:scale-105 shadow-lg">
+                <i class="fas fa-plus-circle mr-2"></i>
+                Nueva Materia
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fas fa-book text-2xl text-blue-600"></i>
+            </div>
+            <p class="text-3xl font-bold text-gray-900">{{ materias|length }}</p>
+            <p class="text-sm text-gray-600 mt-1">Total Materias</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fas fa-users text-2xl text-purple-600"></i>
+            </div>
+            <p class="text-3xl font-bold text-gray-900">
+                {% widthratio materias|length 1 1 %}
+            </p>
+            <p class="text-sm text-gray-600 mt-1">Con Comisiones</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fas fa-graduation-cap text-2xl text-green-600"></i>
+            </div>
+            <p class="text-3xl font-bold text-gray-900">1°-5°</p>
+            <p class="text-sm text-gray-600 mt-1">Años Cubiertos</p>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input 
+                        type="text" 
+                        id="searchInput"
+                        placeholder="Buscar por código o nombre de materia..."
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+            </div>
+            <select id="yearFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                <option value="">Todos los años</option>
+                <option value="1">1° Año</option>
+                <option value="2">2° Año</option>
+                <option value="3">3° Año</option>
+                <option value="4">4° Año</option>
+                <option value="5">5° Año</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Materias Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-table mr-3 text-indigo-600"></i>
+                Catálogo de Materias
+            </h3>
+        </div>
+
+        {% if materias %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th>Código</th>
-                        <th>Nombre</th>
-                        <th>Año</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Código
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Nombre
+                        </th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Año
+                        </th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Créditos
+                        </th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Comisiones
+                        </th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Acciones
+                        </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-200" id="materiasTable">
                     {% for materia in materias %}
-                    <tr>
-                        <td>{{ materia.codigo }}</td>
-                        <td>{{ materia.nombre }}</td>
-                        <td>{{ materia.año }}</td>
+                    <tr class="hover:bg-gray-50 transition materia-row" 
+                        data-search="{{ materia.codigo }} {{ materia.nombre }}"
+                        data-year="{{ materia.año }}">
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
+                                {{ materia.codigo }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold mr-3">
+                                    {{ materia.nombre.0 }}
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-900">{{ materia.nombre }}</p>
+                                    {% if materia.descripcion %}
+                                    <p class="text-sm text-gray-500 line-clamp-1">{{ materia.descripcion|truncatewords:10 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="text-2xl font-bold text-indigo-600">{{ materia.año }}°</span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800">
+                                <i class="fas fa-award mr-1"></i>
+                                {{ materia.creditos }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
+                                <i class="fas fa-users mr-1"></i>
+                                {{ materia.materia_comisiones.count }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <a href="{% url 'ver_materia' materia.id %}" 
+                                   class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" 
+                                   title="Ver detalles y gestionar comisiones">
+                                    <i class="fas fa-cog"></i>
+                                </a>
+                            </div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-    </div>
-
-    <div class="row mt-3">
-        <div class="col">
-            <a href="{% url 'agregar_materia' %}" class="btn btn-primary">Agregar Materia</a>
+        {% else %}
+        <div class="p-12 text-center">
+            <i class="fas fa-book text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Sin Materias Registradas</h3>
+            <p class="text-gray-600 mb-6">Comienza creando la primera materia del sistema.</p>
+            <a href="{% url 'agregar_materia' %}" class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition">
+                <i class="fas fa-plus-circle mr-2"></i>
+                Crear Primera Materia
+            </a>
         </div>
+        {% endif %}
     </div>
 </div>
-{% endblock %}
 
+<script>
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', filterTable);
+document.getElementById('yearFilter').addEventListener('change', filterTable);
+
+function filterTable() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const yearFilter = document.getElementById('yearFilter').value;
+    const rows = document.querySelectorAll('.materia-row');
+    
+    rows.forEach(row => {
+        const searchText = row.getAttribute('data-search').toLowerCase();
+        const year = row.getAttribute('data-year');
+        
+        const matchesSearch = searchText.includes(searchTerm);
+        const matchesYear = !yearFilter || year === yearFilter;
+        
+        if (matchesSearch && matchesYear) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

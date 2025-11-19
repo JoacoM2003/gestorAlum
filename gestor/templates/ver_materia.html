@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ materia.nombre }} - Gestión{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Back Button -->
+    <a href="{% url 'ver_materias' %}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-medium transition">
+        <i class="fas fa-arrow-left mr-2"></i>
+        Volver a Materias
+    </a>
+
+    <!-- Materia Header -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="gradient-bg p-8 text-white">
+            <div class="flex items-start justify-between">
+                <div>
+                    <span class="inline-block px-4 py-1 bg-white/20 backdrop-blur rounded-full text-sm font-semibold mb-3">
+                        {{ materia.codigo }}
+                    </span>
+                    <h1 class="text-4xl font-bold mb-2">{{ materia.nombre }}</h1>
+                    <p class="text-indigo-100 text-lg">{{ materia.descripcion|default:"Sin descripción disponible" }}</p>
+                </div>
+                <div class="text-right">
+                    <div class="bg-white/20 backdrop-blur rounded-lg p-4 min-w-[100px]">
+                        <p class="text-5xl font-bold">{{ materia.año }}°</p>
+                        <p class="text-indigo-100 text-sm mt-1">Año</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6">
+            <div class="flex flex-wrap gap-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-award text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Créditos</p>
+                        <p class="text-lg font-bold text-gray-900">{{ materia.creditos }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-users text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Comisiones</p>
+                        <p class="text-lg font-bold text-gray-900">{{ materia.materia_comisiones.count }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comisiones Section -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-list-ul mr-3 text-indigo-600"></i>
+                Comisiones de esta Materia
+            </h2>
+            <button onclick="openCreateModal()" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-semibold transition">
+                <i class="fas fa-plus mr-2"></i>
+                Nueva Comisión
+            </button>
+        </div>
+
+        {% if materia.materia_comisiones.all %}
+        <div class="grid gap-4">
+            {% for materia_comision in materia.materia_comisiones.all %}
+            <div class="card-hover border-2 border-gray-200 hover:border-indigo-300 rounded-xl overflow-hidden transition">
+                <div class="p-5 bg-gradient-to-br from-indigo-50 to-purple-50">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                                {{ forloop.counter }}
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900">Comisión {{ materia_comision.comision.nombre }}</h3>
+                                <p class="text-sm text-gray-600">{{ materia.nombre }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                <i class="fas fa-users mr-1"></i>
+                                {{ materia_comision.cantidad_inscriptos }}/{{ materia_comision.cupo_maximo }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Horarios -->
+                    {% if materia_comision.horarios.exists %}
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        {% for horario in materia_comision.horarios.all %}
+                        <span class="inline-flex items-center px-3 py-1 bg-white text-indigo-700 rounded-lg text-sm border border-indigo-200">
+                            <i class="fas fa-clock mr-2"></i>
+                            <strong class="mr-1">{{ horario.dias }}:</strong>
+                            {{ horario.hora_inicio }} - {{ horario.hora_fin }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-sm text-gray-500 italic mb-3">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Sin horarios asignados
+                    </p>
+                    {% endif %}
+
+                    <!-- Profesores -->
+                    {% if materia_comision.rolprofesor_set.exists %}
+                    <div class="mb-3">
+                        <p class="text-sm font-semibold text-gray-700 mb-2">Profesores asignados:</p>
+                        <div class="flex flex-wrap gap-2">
+                            {% for rol in materia_comision.rolprofesor_set.all %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                                {% if rol.rol == 'Titular' %}bg-indigo-100 text-indigo-800{% else %}bg-purple-100 text-purple-800{% endif %}">
+                                <i class="fas fa-user mr-1"></i>
+                                {{ rol.profesor.user.get_full_name }} ({{ rol.rol }})
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Progress Bar -->
+                    <div class="flex items-center gap-3">
+                        <div class="flex-1">
+                            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-600" 
+                                     style="width: {% widthratio materia_comision.cantidad_inscriptos materia_comision.cupo_maximo 100 %}%"></div>
+                            </div>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-600">
+                            {% widthratio materia_comision.cantidad_inscriptos materia_comision.cupo_maximo 100 %}%
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="p-4 bg-white border-t border-gray-200 flex gap-2">
+                    <button class="flex-1 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-medium transition text-sm">
+                        <i class="fas fa-clock mr-1"></i>
+                        Gestionar Horarios
+                    </button>
+                    <button class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg font-medium transition text-sm">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Sin Comisiones</h3>
+            <p class="text-gray-600 mb-6">Esta materia aún no tiene comisiones creadas.</p>
+            <button onclick="openCreateModal()" class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition">
+                <i class="fas fa-plus-circle mr-2"></i>
+                Crear Primera Comisión
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal Create Comision -->
+<div id="createModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4" onclick="closeCreateModal()">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl transform transition-all" onclick="event.stopPropagation()">
+        <form action="{% url 'ver_materia' materia.id %}" method="POST">
+            {% csrf_token %}
+            <div class="p-6">
+                <div class="w-20 h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-users text-4xl text-indigo-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 text-center mb-2">Crear Nueva Comisión</h3>
+                <p class="text-gray-600 text-center mb-6">
+                    Para la materia: <strong>{{ materia.nombre }}</strong>
+                </p>
+
+                <div class="space-y-4">
+                    <div>
+                        <label for="comision" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-tag mr-1 text-gray-400"></i>
+                            Seleccionar Comisión Existente
+                        </label>
+                        <select 
+                            name="comision" 
+                            id="comision"
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" 
+                            required>
+                            <option value="">-- Seleccione una comisión --</option>
+                            {% for comision in comisiones %}
+                            <option value="{{ comision.id }}">{{ comision.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="mt-2 text-xs text-gray-500">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Las comisiones se crean desde el panel principal y luego se asignan a las materias
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mt-6">
+                    <button 
+                        type="button"
+                        onclick="closeCreateModal()" 
+                        class="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancelar
+                    </button>
+                    <button 
+                        type="submit" 
+                        class="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-semibold transition">
+                        <i class="fas fa-check mr-2"></i>
+                        Agregar
+                    </button>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <a href="{% url 'agregar_comision' %}" class="block text-center text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                        <i class="fas fa-plus-circle mr-1"></i>
+                        ¿No existe la comisión? Crear una nueva
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openCreateModal() {
+    document.getElementById('createModal').classList.remove('hidden');
+}
+
+function closeCreateModal() {
+    document.getElementById('createModal').classList.add('hidden');
+}
+</script>
+{% endblock %}

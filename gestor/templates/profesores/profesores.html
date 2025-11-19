@@ -1,42 +1,205 @@
 {% extends "base.html" %}
 
+{% block page_title %}Gestión de Profesores{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>Profesores</h2>
-    
-    <div class="row">
-        <div class="col">
-            <table class="table table-striped">
-                <thead>
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Gestión de Profesores</h2>
+                <p class="text-gray-600">Administra los profesores y sus asignaciones</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="{% url 'agregar_profesor' %}" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-semibold transition transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-plus-circle mr-2"></i>
+                    Agregar Profesor
+                </a>
+                <a href="{% url 'asignar_profesor' %}" class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition">
+                    <i class="fas fa-user-check mr-2"></i>
+                    Asignar a Comisión
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fas fa-chalkboard-teacher text-2xl text-purple-600"></i>
+            </div>
+            <p class="text-3xl font-bold text-gray-900">{{ profesores|length }}</p>
+            <p class="text-sm text-gray-600 mt-1">Total Profesores</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fas fa-user-check text-2xl text-green-600"></i>
+            </div>
+            <p class="text-3xl font-bold text-green-600">{{ profesores|length }}</p>
+            <p class="text-sm text-gray-600 mt-1">Activos</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fas fa-book text-2xl text-blue-600"></i>
+            </div>
+            <p class="text-3xl font-bold text-blue-600">0</p>
+            <p class="text-sm text-gray-600 mt-1">Con Materias</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fas fa-user-plus text-2xl text-indigo-600"></i>
+            </div>
+            <p class="text-3xl font-bold text-indigo-600">0</p>
+            <p class="text-sm text-gray-600 mt-1">Este Mes</p>
+        </div>
+    </div>
+
+    <!-- Search and Filter Bar -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input 
+                        type="text" 
+                        id="searchInput"
+                        placeholder="Buscar por nombre, legajo o DNI..."
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+            </div>
+            <button class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition">
+                <i class="fas fa-filter mr-2"></i>
+                Filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Profesores Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-table mr-3 text-indigo-600"></i>
+                Lista de Profesores
+            </h3>
+        </div>
+
+        {% if profesores %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th>Legajo</th>
-                        <th>Nombre</th>
-                        <th>Apellido</th>
-                        <th>Acciones</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            #
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Profesor
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Legajo
+                        </th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Materias Asignadas
+                        </th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Estado
+                        </th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Acciones
+                        </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-200" id="profesoresTable">
                     {% for profesor in profesores %}
-                    <tr>
-                        <td>{{ profesor.legajo }}</td>
-                        <td>{{ profesor.user.first_name }}</td>
-                        <td>{{ profesor.user.last_name }}</td>
-                        <td>
-                            <a href="{% url 'detalle_profesor' profesor.id %}" class="btn btn-info btn-sm">Ver Detalle</a>
+                    <tr class="hover:bg-gray-50 transition profesor-row" 
+                        data-search="{{ profesor.user.first_name }} {{ profesor.user.last_name }} {{ profesor.legajo }}">
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-purple-100 text-purple-600 font-semibold text-sm">
+                                {{ forloop.counter }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-bold mr-3">
+                                    {{ profesor.user.first_name.0 }}{{ profesor.user.last_name.0 }}
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-900">
+                                        {{ profesor.user.first_name }} {{ profesor.user.last_name }}
+                                    </p>
+                                    <p class="text-sm text-gray-500">{{ profesor.user.email }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
+                                {{ profesor.legajo }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                <i class="fas fa-book mr-1"></i>
+                                {{ profesor.rolprofesor_set.count }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold 
+                                {% if profesor.activo %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                <i class="fas {% if profesor.activo %}fa-check-circle{% else %}fa-times-circle{% endif %} mr-1"></i>
+                                {% if profesor.activo %}Activo{% else %}Inactivo{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <a href="{% url 'detalle_profesor' profesor.id %}" 
+                                   class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" 
+                                   title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'toggle_profesor' profesor.id %}" 
+                                   class="p-2 {% if profesor.activo %}text-orange-600 hover:bg-orange-50{% else %}text-green-600 hover:bg-green-50{% endif %} rounded-lg transition" 
+                                   title="{% if profesor.activo %}Desactivar{% else %}Activar{% endif %}">
+                                    <i class="fas {% if profesor.activo %}fa-user-slash{% else %}fa-user-check{% endif %}"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-    </div>
-
-    <div class="row mt-3">
-        <div class="col">
-            <a href="{% url 'agregar_profesor' %}" class="btn btn-primary">Agregar Profesor</a>
-            <a href="{% url 'asignar_profesor' %}" class="btn btn-primary">Asignar Profesor</a>
+        {% else %}
+        <div class="p-12 text-center">
+            <i class="fas fa-chalkboard-teacher text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Sin Profesores Registrados</h3>
+            <p class="text-gray-600 mb-6">Aún no hay profesores en el sistema.</p>
+            <a href="{% url 'agregar_profesor' %}" class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition">
+                <i class="fas fa-plus-circle mr-2"></i>
+                Agregar Primer Profesor
+            </a>
         </div>
+        {% endif %}
     </div>
 </div>
-{% endblock %}
 
+<script>
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('.profesor-row');
+    
+    rows.forEach(row => {
+        const searchText = row.getAttribute('data-search').toLowerCase();
+        if (searchText.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

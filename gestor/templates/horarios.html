@@ -1,25 +1,179 @@
 {% extends "base.html" %}
 
+{% block page_title %}Mi Horario{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>Horarios</h2>
-    <div class="row">
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Mi Horario Semanal</h2>
+                <p class="text-gray-600">Visualiza tus clases organizadas por día</p>
+            </div>
+            <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition">
+                <i class="fas fa-print mr-2"></i>
+                Imprimir
+            </button>
+        </div>
+    </div>
+
+    <!-- Calendar View -->
+    <div class="grid lg:grid-cols-7 gap-4">
         {% for dia, horarios_dia in horarios.items %}
-        <div class="col">
-            <h4>{{ dia }}</h4>
-            <ul class="list-group">
-                {% for horario in horarios_dia %}
-                <li class="list-group-item">
-                    Materia: {{ horario.materiacomision_set.first.materia.nombre }} <br>
-                    Comisión: {{ horario.materiacomision_set.first.comision.nombre }} <br>
-                    Hora: {{ horario.hora_inicio }} - {{ horario.hora_fin }}
-                </li>
-                {% endfor %}
-            </ul>
+        <div class="bg-white rounded-xl shadow-sm border-2 
+            {% if dia == 'Lunes' %}border-blue-300
+            {% elif dia == 'Martes' %}border-green-300
+            {% elif dia == 'Miércoles' %}border-yellow-300
+            {% elif dia == 'Jueves' %}border-purple-300
+            {% elif dia == 'Viernes' %}border-pink-300
+            {% elif dia == 'Sábado' %}border-orange-300
+            {% else %}border-red-300{% endif %} overflow-hidden">
+            
+            <!-- Day Header -->
+            <div class="p-4 
+                {% if dia == 'Lunes' %}bg-gradient-to-br from-blue-500 to-blue-600
+                {% elif dia == 'Martes' %}bg-gradient-to-br from-green-500 to-green-600
+                {% elif dia == 'Miércoles' %}bg-gradient-to-br from-yellow-500 to-yellow-600
+                {% elif dia == 'Jueves' %}bg-gradient-to-br from-purple-500 to-purple-600
+                {% elif dia == 'Viernes' %}bg-gradient-to-br from-pink-500 to-pink-600
+                {% elif dia == 'Sábado' %}bg-gradient-to-br from-orange-500 to-orange-600
+                {% else %}bg-gradient-to-br from-red-500 to-red-600{% endif %}">
+                <h3 class="text-white font-bold text-lg text-center">{{ dia }}</h3>
+                <p class="text-white/80 text-xs text-center mt-1">{{ horarios_dia|length }} clase{% if horarios_dia|length != 1 %}s{% endif %}</p>
+            </div>
+
+            <!-- Classes List -->
+            <div class="p-3 space-y-2">
+                {% if horarios_dia %}
+                    {% for item in horarios_dia %}
+                    <div class="card-hover bg-gradient-to-br 
+                        {% if dia == 'Lunes' %}from-blue-50 to-blue-100 border-blue-200
+                        {% elif dia == 'Martes' %}from-green-50 to-green-100 border-green-200
+                        {% elif dia == 'Miércoles' %}from-yellow-50 to-yellow-100 border-yellow-200
+                        {% elif dia == 'Jueves' %}from-purple-50 to-purple-100 border-purple-200
+                        {% elif dia == 'Viernes' %}from-pink-50 to-pink-100 border-pink-200
+                        {% elif dia == 'Sábado' %}from-orange-50 to-orange-100 border-orange-200
+                        {% else %}from-red-50 to-red-100 border-red-200{% endif %} 
+                        border rounded-lg p-3">
+                        
+                        <!-- Time Badge -->
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold
+                                {% if dia == 'Lunes' %}bg-blue-500
+                                {% elif dia == 'Martes' %}bg-green-500
+                                {% elif dia == 'Miércoles' %}bg-yellow-500
+                                {% elif dia == 'Jueves' %}bg-purple-500
+                                {% elif dia == 'Viernes' %}bg-pink-500
+                                {% elif dia == 'Sábado' %}bg-orange-500
+                                {% else %}bg-red-500{% endif %} text-white">
+                                <i class="fas fa-clock mr-1"></i>
+                                {{ item.horario.hora_inicio|time:"H:i" }}
+                            </span>
+                            <i class="fas fa-arrow-right text-gray-400 mx-1"></i>
+                            <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold
+                                {% if dia == 'Lunes' %}bg-blue-500
+                                {% elif dia == 'Martes' %}bg-green-500
+                                {% elif dia == 'Miércoles' %}bg-yellow-500
+                                {% elif dia == 'Jueves' %}bg-purple-500
+                                {% elif dia == 'Viernes' %}bg-pink-500
+                                {% elif dia == 'Sábado' %}bg-orange-500
+                                {% else %}bg-red-500{% endif %} text-white">
+                                {{ item.horario.hora_fin|time:"H:i" }}
+                            </span>
+                        </div>
+
+                        <!-- Materia Info -->
+                        <div class="space-y-1">
+                            <p class="font-bold text-gray-900 text-sm leading-tight">
+                                {{ item.comision.materia.nombre }}
+                            </p>
+                            <div class="flex items-center text-xs text-gray-600">
+                                <i class="fas fa-users mr-1"></i>
+                                <span>{{ item.comision.comision.nombre }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-8">
+                        <i class="fas fa-coffee text-4xl text-gray-300 mb-2"></i>
+                        <p class="text-sm text-gray-500">Sin clases</p>
+                    </div>
+                {% endif %}
+            </div>
         </div>
         {% endfor %}
     </div>
+
+    <!-- Timeline View (Alternative) -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+            <i class="fas fa-list-ul mr-3 text-indigo-600"></i>
+            Vista de Lista
+        </h3>
+
+        <div class="space-y-4">
+            {% for dia, horarios_dia in horarios.items %}
+            {% if horarios_dia %}
+            <div class="border-l-4 
+                {% if dia == 'Lunes' %}border-blue-500
+                {% elif dia == 'Martes' %}border-green-500
+                {% elif dia == 'Miércoles' %}border-yellow-500
+                {% elif dia == 'Jueves' %}border-purple-500
+                {% elif dia == 'Viernes' %}border-pink-500
+                {% elif dia == 'Sábado' %}border-orange-500
+                {% else %}border-red-500{% endif %} pl-4 py-2">
+                
+                <h4 class="font-bold text-gray-900 mb-2">{{ dia }}</h4>
+                <div class="space-y-2">
+                    {% for horario in horarios_dia %}
+                    <div class="flex items-start gap-3 text-sm">
+                        <span class="inline-flex items-center px-3 py-1 rounded-lg font-semibold
+                            {% if dia == 'Lunes' %}bg-blue-100 text-blue-800
+                            {% elif dia == 'Martes' %}bg-green-100 text-green-800
+                            {% elif dia == 'Miércoles' %}bg-yellow-100 text-yellow-800
+                            {% elif dia == 'Jueves' %}bg-purple-100 text-purple-800
+                            {% elif dia == 'Viernes' %}bg-pink-100 text-pink-800
+                            {% elif dia == 'Sábado' %}bg-orange-100 text-orange-800
+                            {% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ horario.hora_inicio }} - {{ horario.hora_fin }}
+                        </span>
+                        {% if horario.materiacomision_set.first %}
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-900">
+                                {{ horario.materiacomision_set.first.materia.nombre }}
+                            </p>
+                            <p class="text-gray-600">
+                                {{ horario.materiacomision_set.first.comision.nombre }}
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Tips Card -->
+    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-100">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-lightbulb text-white text-xl"></i>
+            </div>
+            <div>
+                <h4 class="font-bold text-gray-900 mb-2">Consejos para organizar tu tiempo</h4>
+                <ul class="text-sm text-gray-700 space-y-1">
+                    <li><i class="fas fa-check text-indigo-600 mr-2"></i>Revisa tu horario regularmente</li>
+                    <li><i class="fas fa-check text-indigo-600 mr-2"></i>Llega 10 minutos antes a cada clase</li>
+                    <li><i class="fas fa-check text-indigo-600 mr-2"></i>Mantén tus materiales organizados por materia</li>
+                    <li><i class="fas fa-check text-indigo-600 mr-2"></i>Planifica tiempo de estudio entre clases</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
-
 {% endblock %}
-

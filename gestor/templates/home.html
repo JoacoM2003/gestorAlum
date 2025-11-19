@@ -1,27 +1,330 @@
 {% extends 'base.html' %}
 
+{% block page_title %}
+    {% if user.is_authenticated %}
+        Dashboard
+    {% else %}
+        Bienvenido
+    {% endif %}
+{% endblock %}
+
 {% block content %}
-<h2>Bienvenido al Sistema de Administración Educativa</h2>
-<p>Aquí podrás gestionar tu información académica de manera sencilla.</p>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Tipo</th>
-            <th>Usuario</th>
-            <th>Contraseña</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Alumno</td>
-            <td>88888</td>
-            <td>88888888</td>
-        </tr>
-        <tr>
-            <td>Profesor</td>
-            <td>77777</td>
-            <td>77777777</td>
-        </tr>
-    </tbody>
-</table>
+{% if not user.is_authenticated %}
+<!-- Hero Section for Non-authenticated Users -->
+<div class="relative overflow-hidden rounded-3xl gradient-bg p-8 md:p-12 mb-8">
+    <div class="relative z-10">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+            Sistema de Administración Educativa
+        </h1>
+        <p class="text-xl text-indigo-100 mb-8 max-w-2xl">
+            Gestiona tu información académica de manera sencilla y eficiente. Accede a tus materias, horarios y calificaciones desde cualquier lugar.
+        </p>
+        <a href="{% url 'signin' %}" class="inline-flex items-center px-6 py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-indigo-50 transition shadow-lg">
+            <i class="fas fa-sign-in-alt mr-2"></i>
+            Iniciar Sesión
+        </a>
+    </div>
+    <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
+    <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24"></div>
+</div>
+
+<!-- Features Grid -->
+<div class="grid md:grid-cols-3 gap-6 mb-12">
+    <div class="card-hover bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+            <i class="fas fa-book text-2xl text-blue-600"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Gestión de Materias</h3>
+        <p class="text-gray-600 text-sm">Inscríbete a materias, consulta horarios y gestiona tu plan de estudios.</p>
+    </div>
+
+    <div class="card-hover bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+            <i class="fas fa-chart-line text-2xl text-green-600"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Seguimiento Académico</h3>
+        <p class="text-gray-600 text-sm">Consulta tus calificaciones y monitorea tu progreso en tiempo real.</p>
+    </div>
+
+    <div class="card-hover bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+            <i class="fas fa-calendar-alt text-2xl text-purple-600"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Horarios</h3>
+        <p class="text-gray-600 text-sm">Organiza tu semana con horarios claros y actualizados.</p>
+    </div>
+</div>
+
+<!-- Demo Credentials -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4">
+        <h2 class="text-xl font-bold text-white flex items-center">
+            <i class="fas fa-key mr-2"></i>
+            Credenciales de Demostración
+        </h2>
+    </div>
+    <div class="p-6">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-gray-200">
+                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Tipo de Usuario</th>
+                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Usuario</th>
+                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Contraseña</th>
+                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
+                        <td class="py-4 px-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <i class="fas fa-user-graduate mr-1"></i> Alumno
+                            </span>
+                        </td>
+                        <td class="py-4 px-4 font-mono text-sm">88888</td>
+                        <td class="py-4 px-4 font-mono text-sm">88888888</td>
+                        <td class="py-4 px-4">
+                            <button onclick="autoLogin('88888', '88888888')" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                                <i class="fas fa-arrow-right mr-1"></i> Usar
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="py-4 px-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                <i class="fas fa-chalkboard-teacher mr-1"></i> Profesor
+                            </span>
+                        </td>
+                        <td class="py-4 px-4 font-mono text-sm">77777</td>
+                        <td class="py-4 px-4 font-mono text-sm">77777777</td>
+                        <td class="py-4 px-4">
+                            <button onclick="autoLogin('77777', '77777777')" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                                <i class="fas fa-arrow-right mr-1"></i> Usar
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="py-4 px-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                <i class="fas fa-chalkboard-teacher mr-1"></i> Admin
+                            </span>
+                        </td>
+                        <td class="py-4 px-4 font-mono text-sm">admin</td>
+                        <td class="py-4 px-4 font-mono text-sm">admin</td>
+                        <td class="py-4 px-4">
+                            <button onclick="autoLogin('admin', 'admin')" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                                <i class="fas fa-arrow-right mr-1"></i> Usar
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function autoLogin(username, password) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{% url "signin" %}';
+    
+    const csrfToken = '{{ csrf_token }}';
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken;
+    
+    const usernameInput = document.createElement('input');
+    usernameInput.type = 'hidden';
+    usernameInput.name = 'username';
+    usernameInput.value = username;
+    
+    const passwordInput = document.createElement('input');
+    passwordInput.type = 'hidden';
+    passwordInput.name = 'password';
+    passwordInput.value = password;
+    
+    form.appendChild(csrfInput);
+    form.appendChild(usernameInput);
+    form.appendChild(passwordInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+
+{% else %}
+<!-- Dashboard for Authenticated Users -->
+<div class="space-y-6">
+    <!-- Welcome Card -->
+    <div class="gradient-bg rounded-2xl p-8 text-white">
+        <h2 class="text-3xl font-bold mb-2">
+            ¡Bienvenido, {{ user.get_full_name|default:user.username }}!
+        </h2>
+        <p class="text-indigo-100">
+            {% if user.alumno %}
+                Estudiante - Legajo: {{ user.alumno.legajo }}
+            {% elif user.profesor %}
+                Profesor - Legajo: {{ user.profesor.legajo }}
+            {% elif user.is_superuser %}
+                Administrador del Sistema
+            {% endif %}
+        </p>
+    </div>
+
+    {% if user.alumno %}
+    <!-- Student Dashboard -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="card-hover bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-book text-2xl text-blue-600"></i>
+                </div>
+            </div>
+            <p class="text-gray-500 text-sm mb-1">Materias Inscritas</p>
+            <p class="text-3xl font-bold text-gray-900">{{ total_materias|default:0 }}</p>
+        </div>
+
+        <div class="card-hover bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check-circle text-2xl text-green-600"></i>
+                </div>
+            </div>
+            <p class="text-gray-500 text-sm mb-1">Materias Aprobadas</p>
+            <p class="text-3xl font-bold text-gray-900">{{ materias_aprobadas|default:0 }}</p>
+        </div>
+
+        <div class="card-hover bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-check text-2xl text-purple-600"></i>
+                </div>
+            </div>
+            <p class="text-gray-500 text-sm mb-1">Comisiones</p>
+            <p class="text-3xl font-bold text-gray-900">{{ comisiones_asignadas|default:0 }}</p>
+        </div>
+
+        <div class="card-hover bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-chart-line text-2xl text-yellow-600"></i>
+                </div>
+            </div>
+            <p class="text-gray-500 text-sm mb-1">Promedio</p>
+            <p class="text-3xl font-bold text-gray-900">{{ promedio|default:"-" }}</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
+        <div class="grid md:grid-cols-3 gap-4">
+            <a href="{% url 'materias' %}" class="flex items-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg hover:shadow-md transition">
+                <i class="fas fa-book text-2xl text-blue-600 mr-3"></i>
+                <span class="font-medium text-gray-900">Ver Materias</span>
+            </a>
+            <a href="{% url 'calificaciones' %}" class="flex items-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg hover:shadow-md transition">
+                <i class="fas fa-chart-bar text-2xl text-green-600 mr-3"></i>
+                <span class="font-medium text-gray-900">Calificaciones</span>
+            </a>
+            <a href="{% url 'horarios' %}" class="flex items-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg hover:shadow-md transition">
+                <i class="fas fa-calendar text-2xl text-purple-600 mr-3"></i>
+                <span class="font-medium text-gray-900">Mi Horario</span>
+            </a>
+        </div>
+    </div>
+
+    {% elif user.profesor %}
+    <!-- Professor Dashboard -->
+    <div class="grid md:grid-cols-3 gap-6">
+        <div class="card-hover bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-chalkboard-teacher text-2xl text-blue-600"></i>
+            </div>
+            <p class="text-gray-500 text-sm mb-1">Materias Asignadas</p>
+            <p class="text-3xl font-bold text-gray-900">{{ materias_asignadas|default:0 }}</p>
+        </div>
+
+        <div class="card-hover bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-users text-2xl text-green-600"></i>
+            </div>
+            <p class="text-gray-500 text-sm mb-1">Total Alumnos</p>
+            <p class="text-3xl font-bold text-gray-900">{{ total_alumnos|default:0 }}</p>
+        </div>
+
+        <div class="card-hover bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-calendar text-2xl text-purple-600"></i>
+            </div>
+            <p class="text-gray-500 text-sm mb-1">Comisiones</p>
+            <p class="text-3xl font-bold text-gray-900">{{ total_comisiones|default:0 }}</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions for Professor -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
+        <div class="grid md:grid-cols-2 gap-4">
+            <a href="{% url 'materias' %}" class="flex items-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg hover:shadow-md transition">
+                <i class="fas fa-book-open text-2xl text-blue-600 mr-3"></i>
+                <span class="font-medium text-gray-900">Mis Materias</span>
+            </a>
+            <a href="{% url 'horarios' %}" class="flex items-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg hover:shadow-md transition">
+                <i class="fas fa-calendar-week text-2xl text-purple-600 mr-3"></i>
+                <span class="font-medium text-gray-900">Mi Horario</span>
+            </a>
+        </div>
+    </div>
+
+    {% elif user.is_superuser %}
+    <!-- Admin Dashboard -->
+    <div class="grid md:grid-cols-3 gap-6">
+        <div class="card-hover bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-user-graduate text-2xl text-blue-600"></i>
+            </div>
+            <p class="text-gray-500 text-sm mb-1">Total Alumnos</p>
+            <p class="text-3xl font-bold text-gray-900">{{ total_alumnos|default:0 }}</p>
+        </div>
+
+        <div class="card-hover bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-chalkboard-teacher text-2xl text-green-600"></i>
+            </div>
+            <p class="text-gray-500 text-sm mb-1">Total Profesores</p>
+            <p class="text-3xl font-bold text-gray-900">{{ total_profesores|default:0 }}</p>
+        </div>
+
+        <div class="card-hover bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-book text-2xl text-purple-600"></i>
+            </div>
+            <p class="text-gray-500 text-sm mb-1">Total Materias</p>
+            <p class="text-3xl font-bold text-gray-900">{{ total_materias|default:0 }}</p>
+        </div>
+    </div>
+
+    <!-- Admin Quick Actions -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Panel de Administración</h3>
+        <div class="grid md:grid-cols-3 gap-4">
+            <a href="{% url 'alumnos' %}" class="flex items-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg hover:shadow-md transition">
+                <i class="fas fa-user-graduate text-2xl text-blue-600 mr-3"></i>
+                <span class="font-medium text-gray-900">Gestionar Alumnos</span>
+            </a>
+            <a href="{% url 'profesores' %}" class="flex items-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg hover:shadow-md transition">
+                <i class="fas fa-chalkboard-teacher text-2xl text-green-600 mr-3"></i>
+                <span class="font-medium text-gray-900">Gestionar Profesores</span>
+            </a>
+            <a href="{% url 'ver_materias' %}" class="flex items-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg hover:shadow-md transition">
+                <i class="fas fa-book text-2xl text-purple-600 mr-3"></i>
+                <span class="font-medium text-gray-900">Gestionar Materias</span>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
 {% endblock %}

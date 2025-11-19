@@ -1,72 +1,52 @@
+# gestor/admin.py
+
 from django.contrib import admin
-from django.contrib.auth.models import User
-from .models import Alumno, Materia, Comision, Inscripcion, Horario, Profesor, MateriaComision, RolProfesor
-from .forms import AlumnoForm, ProfesorForm
-from django.utils.html import format_html
+from .models import Alumno, Profesor, Materia, Comision, MateriaComision, RolProfesor, Horario, Inscripcion
 
+@admin.register(Alumno)
 class AlumnoAdmin(admin.ModelAdmin):
-    form = AlumnoForm  # Usar el formulario personalizado
-    list_display = ('user', 'dni', 'legajo')
-    search_fields = ('user__username', 'dni', 'legajo')
-    exclude = ('user',)  # Ocultar el campo 'user' en el admin
+    list_display = ('legajo', 'user', 'dni', 'activo', 'fecha_inscripcion')
+    list_filter = ('activo', 'fecha_inscripcion')
+    search_fields = ('legajo', 'dni', 'user__first_name', 'user__last_name')
 
-    def save_model(self, request, obj, form, change):
-        if not obj.user:  # Si no hay usuario, lo creamos
-            user = User.objects.create_user(
-                username=obj.legajo,  
-                password=obj.dni,
-                first_name=form.cleaned_data['first_name'],
-                last_name=form.cleaned_data['last_name'],
-                email=form.cleaned_data['email']
-            )
-            obj.user = user  # Asignamos el usuario al alumno
-        super().save_model(request, obj, form, change)
-
-admin.site.register(Alumno, AlumnoAdmin)
-
-
+@admin.register(Profesor)
 class ProfesorAdmin(admin.ModelAdmin):
-    form = ProfesorForm  # Usar el formulario personalizado
-    list_display = ('user', 'dni', 'legajo')
-    search_fields = ('user__username', 'dni', 'legajo')
-    exclude = ('user',)  # Ocultar el campo 'user' en el admin
-
-    def save_model(self, request, obj, form, change):
-        if not obj.user:  # Si no hay usuario, lo creamos
-            user = User.objects.create_user(
-                username=obj.legajo,  
-                password=obj.dni,
-                first_name=form.cleaned_data['first_name'],
-                last_name=form.cleaned_data['last_name'],
-                email=form.cleaned_data['email']
-            )
-            obj.user = user  # Asignamos el usuario al profesor
-        super().save_model(request, obj, form, change)
-
-admin.site.register(Profesor, ProfesorAdmin)
-
-
-
-class MateriaComisionInline(admin.TabularInline):
-    model = MateriaComision
-    extra = 1
+    list_display = ('legajo', 'user', 'dni', 'activo')
+    list_filter = ('activo',)
+    search_fields = ('legajo', 'dni', 'user__first_name', 'user__last_name')
 
 @admin.register(Materia)
 class MateriaAdmin(admin.ModelAdmin):
     list_display = ('codigo', 'nombre', 'año', 'creditos')
-    inlines = [MateriaComisionInline]  # Permite agregar comisiones desde Materia
+    list_filter = ('año',)
+    search_fields = ('codigo', 'nombre')
 
 @admin.register(Comision)
 class ComisionAdmin(admin.ModelAdmin):
     list_display = ('nombre',)
+    search_fields = ('nombre',)
 
 @admin.register(MateriaComision)
 class MateriaComisionAdmin(admin.ModelAdmin):
-    list_display = ('materia', 'comision', 'cupo_maximo')
-    filter_horizontal = ('horarios',)  # Muestra una interfaz para seleccionar horarios en el admin
+    list_display = ('materia', 'comision', 'cupo_maximo', 'cantidad_inscriptos')
+    list_filter = ('materia', 'comision')
+    search_fields = ('materia__nombre', 'comision__nombre')
+    # ELIMINAR: filter_horizontal = ('horarios',)  # Ya no existe este campo
 
-admin.site.register(Horario)
+@admin.register(Horario)
+class HorarioAdmin(admin.ModelAdmin):
+    list_display = ('materia_comision', 'dia', 'hora_inicio', 'hora_fin')
+    list_filter = ('dia', 'materia_comision__materia')
+    search_fields = ('materia_comision__materia__nombre', 'materia_comision__comision__nombre')
 
-admin.site.register(Inscripcion)
+@admin.register(RolProfesor)
+class RolProfesorAdmin(admin.ModelAdmin):
+    list_display = ('profesor', 'materia_comision', 'rol')
+    list_filter = ('rol',)
+    search_fields = ('profesor__user__first_name', 'profesor__user__last_name')
 
-admin.site.register(RolProfesor)
+@admin.register(Inscripcion)
+class InscripcionAdmin(admin.ModelAdmin):
+    list_display = ('alumno', 'materia_comision', 'año_cursada', 'nota', 'aprobado', 'fecha_inscripcion')
+    list_filter = ('aprobado', 'año_cursada', 'fecha_inscripcion')
+    search_fields = ('alumno__legajo', 'alumno__user__first_name', 'alumno__user__last_name')

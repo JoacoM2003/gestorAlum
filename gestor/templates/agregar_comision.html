@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Crear Nueva Comisión</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre de la Comisión</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="cupo_maximo" class="form-label">Cupo Máximo</label>
+            <input type="number" class="form-control" id="cupo_maximo" name="cupo_maximo" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Crear Comisión</button>
+    </form>
+
+    <a href="{% url 'ver_materias' %}" class="btn btn-secondary mt-3">Volver</a>
+</div>
+{% endblock %}
+
