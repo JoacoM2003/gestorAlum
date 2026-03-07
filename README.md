@@ -1,70 +1,115 @@
-# 📚 GestorAlum
+# 🎓 GestorAlum: Sistema Integral de Gestión Académica
 
-**GestorAlum** es una aplicación web desarrollada con Django, diseñada para gestionar información de estudiantes, incluyendo sus datos personales, notas y asistencia. Esta herramienta facilita el seguimiento académico y administrativo de los alumnos.
+[![Django](https://img.shields.io/badge/Framework-Django%205.1-092e20?style=for-the-badge&logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![Python](https://img.shields.io/badge/Language-Python%203.11-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Docker](https://img.shields.io/badge/Container-Docker-2496ed?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
-## 🛠️ Tecnologías
+**GestorAlum** es una plataforma robusta y escalable diseñada para centralizar la administración académica. Desde la gestión de inscripciones hasta el seguimiento de calificaciones, el sistema ofrece una experiencia fluida tanto para administradores como para docentes y alumnos.
 
-- **Backend:** Python 3.11, Django
-- **Frontend:** HTML, CSS
-- **Contenerización:** Docker
-- **Base de datos:** PostgreSQL
+---
 
-## 🚀 Instalación
+## 🎯 ¿Qué resuelve este proyecto?
 
-1. Clona el repositorio:
+En entornos académicos, la dispersión de la información en planillas de cálculo suele generar errores y duplicidad. **GestorAlum** resuelve:
+*   **Gestión Centralizada**: Un único punto de verdad para datos personales, académicos y horarios.
+*   **Automatización de Inscripciones**: Control de cupos en tiempo real para materias y comisiones.
+*   **Transparencia Académica**: Dashboards personalizados para alumnos con promedios y estados de cursada automáticos.
+*   **Eficiencia Docente**: Simplificación de la carga de notas y gestión de actas de cursada.
 
-\`\`\`bash
-git clone https://github.com/JoacoM2003/gestorAlum.git
-cd gestorAlum
-\`\`\`
+---
 
-2. Construye y ejecuta los contenedores con Docker:
+## 🏗️ Decisiones Técnicas y Arquitectura
 
-\`\`\`bash
-docker-compose up --build
-\`\`\`
+### ¿Por qué Python y Django?
+La elección de **Django** no fue azarosa. Su filosofía *"batteries included"* permitió:
+1.  **Seguridad por Defecto**: Protección contra inyecciones SQL, XSS y CSRF nativa.
+2.  **Productividad**: El uso del **Django Admin** permitió desplegar el backend administrativo en tiempo récord, permitiendo enfocarse en la lógica de negocio personalizada.
+3.  **ORM Potente**: Gestión de relaciones complejas (Many-to-Many entre Materias y Comisiones) de forma intuitiva y segura.
 
-3. Accede a la aplicación en tu navegador:
+### Arquitectura de Software
+El proyecto implementa un patrón **MVT (Model-View-Template)** con una capa adicional de lógica basada en roles:
+*   **Modelos Extensibles**: Se utilizó una relación `OneToOne` con el modelo `User` de Django para crear perfiles de `Alumno` y `Profesor` sin comprometer la integridad del sistema de autenticación estándar.
+*   **Role-Based Access Control (RBAC)**: Decoradores personalizados y validaciones en vistas aseguran que cada usuario solo acceda a la información pertinente a su rol.
+*   **Desacoplamiento Académico**: La relación `MateriaComision` actúa como puente, permitiendo que una materia sea dictada en múltiples horarios y por distintos profesores de forma flexible.
 
-\`\`\`
-http://localhost:8000
-\`\`\`
+---
 
-## 🔧 Estructura del Proyecto
+## 🛠️ Stack Tecnológico
 
-- `gestor/`: Aplicación principal para la gestión de alumnos.
-- `gestorAlum/`: Configuración del proyecto Django.
-- `Dockerfile`: Configuración del contenedor.
-- `docker-compose.yml`: Orquestación de servicios.
-- `manage.py`: Herramienta de administración de Django.
-- `requirements.txt`: Dependencias de Python.
+| Componente | Tecnología | Razón de elección |
+| :--- | :--- | :--- |
+| **Backend** | Python 3.11 / Django 5.1 | Madurez, escalabilidad y rapidez de desarrollo. |
+| **Base de Datos** | PostgreSQL | Integridad referencial y soporte robusto para transacciones atómicas. |
+| **Contenerización** | Docker & Docker Compose | Garantiza paridad absoluta entre entornos de desarrollo y producción. |
+| **Frontend** | Django Templates / CSS3 | Renderizado eficiente en el servidor y optimización SEO. |
+| **Servidor WSGI** | Gunicorn | Estándar de la industria para el despliegue de aplicaciones Python. |
 
-## 🧪 Uso
+---
 
-- **Crear superusuario:**
+## 🌟 Características Principales
 
-\`\`\`bash
-docker-compose exec web python manage.py createsuperuser
-\`\`\`
+### 👤 Perfil Alumno
+- **Dashboard de Estadísticas**: Vista rápida de promedio, materias aprobadas y cursando.
+- **Inscripción Inteligente**: Buscador de materias y validación de cupos por comisión.
+- **Agenda de Horarios**: Calendario dinámico con los días y horarios de cursada.
+- **Seguimiento Curricular**: Historial completo de calificaciones.
 
-- **Acceder al panel de administración:**
+### 👨‍🏫 Perfil Profesor
+- **Gestión de Comisiones**: Acceso directo a las listas de alumnos por materia asignada.
+- **Carga de Notas**: Sistema ágil para calificar y monitorear el rendimiento del grupo.
+- **Limpieza de Actas**: Herramientas para depurar inscripciones sin calificación.
 
-\`\`\`
-http://localhost:8000/admin
-\`\`\`
+### 🔐 Administración (Superuser)
+- **Gestión de Cuentas**: Alta, baja y modificación de alumnos y docentes.
+- **Configuración Académica**: Creación de materias, comisiones y asignación de roles docentes (Titular/Ayudante).
 
-- **Agregar y gestionar alumnos, notas y asistencia** desde el panel de administración.
+---
 
-## 🌟 Características
+## 🚀 Instalación y Despliegue Local
 
-- Gestión de datos personales de alumnos.
-- Registro y seguimiento de notas y calificaciones.
-- Control de asistencia.
-- Panel de administración completo para superusuarios.
-- Sistema modular con varias apps de Django.
+### Requisitos Previos
+- Docker y Docker Compose instalados.
 
-## 🎬 Demo
+### Pasos:
+1.  **Clonar el repositorio**:
+    ```bash
+    git clone https://github.com/JoacoM2003/gestorAlum.git
+    cd gestorAlum
+    ```
 
-Puedes ver una demo del proyecto en funcionamiento en el siguiente enlace:
+2.  **Configurar Variables de Envorno**:
+    Crea un archivo `.env` en la raíz del proyecto.
+    ```env
+    DEBUG=True
+    SECRET_KEY=tu_clave_secreta_aqui
+    DATABASE_URL=postgres://postgres:admin@db:5432/gestorAlum
+    ```
 
-[Demo del GestorAlum](https://gestoralum.onrender.com/)  
+3.  **Encender Motores**:
+    ```bash
+    docker-compose up --build
+    ```
+
+4.  **Inicializar Base de Datos**:
+    En una nueva terminal, ejecuta las migraciones y crea el usuario administrador:
+    ```bash
+    docker-compose exec web python manage.py migrate
+    docker-compose exec web python manage.py createsuperuser
+    ```
+
+5.  **Acceso**:
+    - App: [http://localhost:8000](http://localhost:8000)
+    - Admin: [http://localhost:8000/admin](http://localhost:8000/admin)
+
+---
+
+## 📌 Roadmap / Futuras Mejoras
+- [ ] Implementación de Reportes en PDF para certificados de alumno regular.
+- [ ] Módulo de Asistencia mediante códigos QR.
+- [ ] Notificaciones vía Email para alertas de inscripción y publicación de notas.
+- [ ] Integración de API RESTful para futura App Mobile.
+
+---
+
+Desarrollado con ❤️ por [JoacoM2003](https://github.com/JoacoM2003)
