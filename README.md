@@ -19,19 +19,30 @@ En entornos académicos, la dispersión de la información en planillas de cálc
 
 ---
 
-## 🏗️ Decisiones Técnicas y Arquitectura
+## 🎥 Demo del Proyecto
+
+🌐 **Link al entorno de pruebas:** [gestoralum.onrender.com](https://gestoralum.onrender.com/)
+
+## 🏗️ Arquitectura y Decisiones Técnicas
+
+### Arquitectura de Software
+El proyecto implementa el patrón arquitectónico **MVT (Model-View-Template)** propio de Django, con una sólida capa de lógica basada en roles:
+*   **Role-Based Access Control (RBAC)**: Mediante decoradores y mixins personalizados se asegura de que cada usuario (Alumno, Profesor o Admin) interactúe únicamente con las vistas y datos correspondientes a su perfil.
+*   **Desacoplamiento Lógico**: La separación de responsabilidades garantiza que la lógica de validación de negocio (ej. control de cupos o verificación de alumnos ya inscriptos) se mantenga en los Modelos/Formularios, manteniendo las Vistas limpias.
+
+### Modelo de Datos (Entity-Relationship)
+La base de datos fue diseñada en tercera forma normal (3NF) para evitar redundancias, asegurando integridad referencial con **PostgreSQL**:
+*   **Gestión de Perfiles**: Extensión del modelo `User` nativo de Django usando relaciones `OneToOne` hacia las entidades `Alumno` y `Profesor`. Esto independiza la autenticación de la información académica.
+*   **Entidades Académicas**: Separación entre `Materia` (definición global, ej: "Matemática 1") y `Comision` (grupos, ej: "Turno Mañana").
+*   **Resolución Many-to-Many Flexible**: La entidad `MateriaComision` es el núcleo del sistema. Conecta una materia con una comisión específica y le define un `cupo_maximo`.
+*   **Gestión Docente y Horarios**: Los horarios (`Horario`) y el cuerpo docente (`RolProfesor`: Titular/Ayudante) se vinculan a la instancia de `MateriaComision`, no a la Materia en sí, permitiendo total flexibilidad organizativa.
+*   **Inscripciones e Historial**: La `Inscripcion` vincula a un `Alumno` con una `MateriaComision` y registra el `año_cursada`. Esto permite llevar un historial histórico de `nota` y condición (`aprobado`), manejando correctamente a los alumnos recursantes sin pisar datos de años anteriores.
 
 ### ¿Por qué Python y Django?
 La elección de **Django** no fue azarosa. Su filosofía *"batteries included"* permitió:
-1.  **Seguridad por Defecto**: Protección contra inyecciones SQL, XSS y CSRF nativa.
-2.  **Productividad**: El uso del **Django Admin** permitió desplegar el backend administrativo en tiempo récord, permitiendo enfocarse en la lógica de negocio personalizada.
-3.  **ORM Potente**: Gestión de relaciones complejas (Many-to-Many entre Materias y Comisiones) de forma intuitiva y segura.
-
-### Arquitectura de Software
-El proyecto implementa un patrón **MVT (Model-View-Template)** con una capa adicional de lógica basada en roles:
-*   **Modelos Extensibles**: Se utilizó una relación `OneToOne` con el modelo `User` de Django para crear perfiles de `Alumno` y `Profesor` sin comprometer la integridad del sistema de autenticación estándar.
-*   **Role-Based Access Control (RBAC)**: Decoradores personalizados y validaciones en vistas aseguran que cada usuario solo acceda a la información pertinente a su rol.
-*   **Desacoplamiento Académico**: La relación `MateriaComision` actúa como puente, permitiendo que una materia sea dictada en múltiples horarios y por distintos profesores de forma flexible.
+1.  **Seguridad por Defecto**: Protección nativa contra inyecciones SQL, ataques XSS, CSRF y Clickjacking.
+2.  **Productividad (Admin Panel)**: El uso del **Django Admin** facilitó desplegar el backend administrativo inmediatamente, focalizando el esfuerzo de desarrollo en los portales específicos de alumnos y profesores.
+3.  **ORM Potente**: Gestión de relaciones complejas en la base de datos de forma programática y agnóstica al motor SQL subyacente.
 
 ---
 
@@ -42,7 +53,7 @@ El proyecto implementa un patrón **MVT (Model-View-Template)** con una capa adi
 | **Backend** | Python 3.11 / Django 5.1 | Madurez, escalabilidad y rapidez de desarrollo. |
 | **Base de Datos** | PostgreSQL | Integridad referencial y soporte robusto para transacciones atómicas. |
 | **Contenerización** | Docker & Docker Compose | Garantiza paridad absoluta entre entornos de desarrollo y producción. |
-| **Frontend** | Django Templates / CSS3 | Renderizado eficiente en el servidor y optimización SEO. |
+| **Frontend** | Django Templates / CSS3 / Bootstrap | Renderizado eficiente en el servidor y diseño responsive veloz. |
 | **Servidor WSGI** | Gunicorn | Estándar de la industria para el despliegue de aplicaciones Python. |
 
 ---
@@ -50,19 +61,19 @@ El proyecto implementa un patrón **MVT (Model-View-Template)** con una capa adi
 ## 🌟 Características Principales
 
 ### 👤 Perfil Alumno
-- **Dashboard de Estadísticas**: Vista rápida de promedio, materias aprobadas y cursando.
-- **Inscripción Inteligente**: Buscador de materias y validación de cupos por comisión.
+- **Dashboard de Estadísticas**: Vista rápida de promedio histórico, materias aprobadas y en curso.
+- **Inscripción Inteligente**: Buscador de materias, validación de cupos por comisión y prevención de doble inscripción anual.
 - **Agenda de Horarios**: Calendario dinámico con los días y horarios de cursada.
 - **Seguimiento Curricular**: Historial completo de calificaciones.
 
 ### 👨‍🏫 Perfil Profesor
-- **Gestión de Comisiones**: Acceso directo a las listas de alumnos por materia asignada.
-- **Carga de Notas**: Sistema ágil para calificar y monitorear el rendimiento del grupo.
-- **Limpieza de Actas**: Herramientas para depurar inscripciones sin calificación.
+- **Gestión de Comisiones**: Acceso directo a las listas de alumnos por materia y comisión asignada.
+- **Carga de Notas**: Sistema ágil para calificar y monitorear el rendimiento del grupo, validando automáticamente la aprobación (>= 4).
+- **Control de Actas**: Herramientas de visualización del estado del alumnado.
 
 ### 🔐 Administración (Superuser)
-- **Gestión de Cuentas**: Alta, baja y modificación de alumnos y docentes.
-- **Configuración Académica**: Creación de materias, comisiones y asignación de roles docentes (Titular/Ayudante).
+- **Gestión de Cuentas**: Alta, baja (soft-delete) y modificación de alumnos y docentes.
+- **Configuración Académica**: Creación de materias, comisiones y asignación de roles docentes (Titular/Ayudante) con resolución de conflictos.
 
 ---
 
@@ -78,8 +89,8 @@ El proyecto implementa un patrón **MVT (Model-View-Template)** con una capa adi
     cd gestorAlum
     ```
 
-2.  **Configurar Variables de Envorno**:
-    Crea un archivo `.env` en la raíz del proyecto.
+2.  **Configurar Variables de Entorno**:
+    Crea un archivo `.env` en la raíz del proyecto basándote en el entorno.
     ```env
     DEBUG=True
     SECRET_KEY=tu_clave_secreta_aqui
@@ -99,16 +110,16 @@ El proyecto implementa un patrón **MVT (Model-View-Template)** con una capa adi
     ```
 
 5.  **Acceso**:
-    - App: [http://localhost:8000](http://localhost:8000)
-    - Admin: [http://localhost:8000/admin](http://localhost:8000/admin)
+    - App Principal: [http://localhost:8000](http://localhost:8000)
+    - Panel Admin: [http://localhost:8000/admin](http://localhost:8000/admin)
 
 ---
 
 ## 📌 Roadmap / Futuras Mejoras
-- [ ] Implementación de Reportes en PDF para certificados de alumno regular.
-- [ ] Módulo de Asistencia mediante códigos QR.
-- [ ] Notificaciones vía Email para alertas de inscripción y publicación de notas.
-- [ ] Integración de API RESTful para futura App Mobile.
+- [ ] Implementación de Reportes en PDF para certificados de alumno regular y analíticos.
+- [ ] Módulo de Asistencia mediante escaneo de códigos QR.
+- [ ] Notificaciones vía Email para alertas de inscripción y publicación de notas (Celery + Redis).
+- [ ] Integración de API RESTful (Django REST Framework) para futura App Mobile.
 
 ---
 
